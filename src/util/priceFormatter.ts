@@ -18,6 +18,9 @@ export function priceFormatter(price: number, currencyCode: CurrencyCode) {
         [CurrencyCode.CZK]: {
             country: 'cs-CZ',
         },
+        [CurrencyCode.BDT]: {
+            country: 'bn-BD',
+        },
     };
     const c = translations[currencyCode];
     if (!c) {

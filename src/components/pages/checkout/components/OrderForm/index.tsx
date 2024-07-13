@@ -76,7 +76,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
     const countryCode =
         defaultBillingAddress?.country.code ??
         defaultShippingAddress?.country.code ??
-        availableCountries?.find(country => country.name === 'Poland')?.code ??
+        availableCountries?.find(country => country.name === 'Bangladesh')?.code ??
         baseCountryFromLanguage(ctx.locale);
 
     const {
@@ -397,31 +397,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                                             disabled={activeCustomer?.id ? true : false}
                                         />
                                     </Stack>
-                                </Stack>
-                            </Stack>
-
-                            {/* Shipping Part */}
-                            <BillingWrapper column>
-                                <TH2 size="2rem" weight={500} style={{ marginBottom: '1.75rem' }}>
-                                    {t('orderForm.billingInfo')}
-                                </TH2>
-                                <Stack w100 column gap="1.5rem">
-                                    <Stack w100 gap="1.5rem">
-                                        <Input
-                                            {...register('billing.fullName')}
-                                            placeholder={t('orderForm.placeholders.fullName')}
-                                            label={t('orderForm.fullName')}
-                                            error={errors.billing?.fullName}
-                                            required
-                                        />
-                                        <Input
-                                            {...register('billing.city')}
-                                            placeholder={t('orderForm.placeholders.city')}
-                                            label={t('orderForm.city')}
-                                            error={errors.billing?.city}
-                                            required
-                                        />
-                                    </Stack>
                                     <Stack w100 gap="1.5rem">
                                         <Input
                                             {...register('billing.streetLine1')}
@@ -430,20 +405,49 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                                             error={errors.billing?.streetLine1}
                                             required
                                         />
-                                        <Input
+                                        {/* <Input
                                             {...register('billing.streetLine2')}
                                             placeholder={t('orderForm.placeholders.streetLine2')}
                                             label={t('orderForm.streetLine2')}
                                             error={errors.billing?.streetLine2}
+                                        /> */}
+                                    </Stack>
+                                </Stack>
+                            </Stack>
+
+                            {/* Shipping Part */}
+                            <BillingWrapper column style={{display: "none"}}>
+                                <TH2 size="2rem" weight={500} style={{ marginBottom: '1.75rem' }}>
+                                    {t('orderForm.billingInfo')}
+                                </TH2>
+                                <Stack w100 column gap="1.5rem">
+                                    <Stack w100 gap="1.5rem" style={{display: "none"}}>
+                                        <Input
+                                            {...register('billing.fullName')}
+                                            placeholder={t('orderForm.placeholders.fullName')}
+                                            label={t('orderForm.fullName')}
+                                            error={errors.billing?.fullName}
+                                            required
+                                            defaultValue={"Customer"}
+                                        />
+                                        <Input
+                                            {...register('billing.city')}
+                                            placeholder={t('orderForm.placeholders.city')}
+                                            label={t('orderForm.city')}
+                                            error={errors.billing?.city}
+                                            required
+                                            defaultValue={"Dhaka"}
                                         />
                                     </Stack>
-                                    <Stack w100 gap="1.5rem">
+                                    
+                                    <Stack w100 gap="1.5rem" style={{display: "none"}}>
                                         <Input
                                             {...register('billing.province')}
                                             placeholder={t('orderForm.placeholders.province')}
                                             label={t('orderForm.province')}
                                             error={errors.billing?.province}
                                             required
+                                            defaultValue={"BD"}
                                         />
                                         <Input
                                             {...register('billing.postalCode')}
@@ -451,9 +455,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                                             label={t('orderForm.postalCode')}
                                             error={errors.billing?.postalCode}
                                             required
+                                            defaultValue={"0000"}
                                         />
                                     </Stack>
-                                    <Stack w100 gap="1.5rem">
+                                    <Stack w100 gap="1.5rem" style={{display: "none"}}>
                                         <Input
                                             {...register('billing.company')}
                                             placeholder={t('orderForm.placeholders.company')}
@@ -476,7 +481,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                             </BillingWrapper>
                         </Stack>
 
-                        <Stack justifyBetween itemsCenter>
+                        <Stack justifyBetween itemsCenter style={{display: "none"}}>
                             {/* <CheckBox
                         {...register('userNeedInvoice', {
                             onChange: e => {
@@ -590,7 +595,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
 
                         {/* Create Account */}
                         {!activeCustomer?.id ? (
-                            <Stack column gap="1.25rem">
+                            <Stack column gap="1.25rem" style={{display: "none"}}>
                                 <Stack itemsCenter gap="1rem">
                                     <CheckBox {...register('createAccount')} label={t('orderForm.createAccount')} />
                                     <Stack itemsCenter justifyCenter>
@@ -639,6 +644,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                                     />
                                 }
                                 required
+                                checked={true}
                             />
                             <AnimatePresence>
                                 {errors.terms?.message && (
