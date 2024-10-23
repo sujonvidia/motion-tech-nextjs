@@ -189,6 +189,19 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                         ),
                                     },
                                     // here
+                                    // Add the landing content here
+                                    // {
+                                    //     title: t('description'),
+                                    //     children: (
+                                    //         <TP color="subtitle" style={{ marginTop: '1.5rem' }}>
+                                    //             {product?.customFields?.landing ? (
+                                    //                 <div dangerouslySetInnerHTML={{ __html: product?.customFields?.landing || '' }} />
+                                    //             ) : (
+                                    //                 <span>{t('description')}</span> // Fallback if `landing` is undefined
+                                    //             )}
+                                    //         </TP>
+                                    //     ),
+                                    // }
                                 ]}
                             />
                         </StyledStack>
