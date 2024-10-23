@@ -28,7 +28,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
     const { product, variant, addingError, productOptionsGroups, handleOptionClick, handleBuyNow, handleAddToCart } =
         useProduct();
 
-    console.log('ProductPage',product,props.product);
+    console.log('ProductPage',product);
     const breadcrumbs = [
         { name: breadcrumb('breadcrumbs.home'), href: '/' },
         { name: props.product.name, href: `/products/${props.product.slug}` },

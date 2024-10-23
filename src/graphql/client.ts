@@ -10,7 +10,12 @@ export const scalars = ZeusScalars({
     },
     JSON: {
         encode: (e: unknown) => JSON.stringify(JSON.stringify(e)),
-        decode: (e: unknown) => JSON.parse(e as string),
+        // decode: (e: unknown) => JSON.parse(e as string),
+        decode: (e: unknown) => {
+            console.log("Response before parsing:", e); // Log the response
+            // If the content is already a string (HTML), just return it as-is
+            return typeof e === 'string' ? e : JSON.stringify(e);
+        },
     },
     DateTime: {
         decode: (e: unknown) => new Date(e as string).toISOString(),
