@@ -62,6 +62,10 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
         fetchData();
     }, [product?.id]);
 
+    function makeAbsoluteUrls(htmlContent:string) {
+        return htmlContent.replace(/src="\.\.\/\.\.\/\.\.\//g, 'src="http://localhost:3000/');
+      }
+
     return (
         <Layout categories={props.collections} navigation={props.navigation}>
             <ContentContainer>
@@ -193,7 +197,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                         children: (
                                             <TP color="subtitle" style={{ marginTop: '1.5rem' }}>
                                                 {product?.customFields?.landing ? (
-                                                    <div dangerouslySetInnerHTML={{ __html: product?.customFields?.landing || '' }} />
+                                                    <div dangerouslySetInnerHTML={{ __html: makeAbsoluteUrls(product?.customFields?.landing || '') }} />
                                                 ) : (
                                                     <span>{t('description')}</span> // Fallback if `landing` is undefined
                                                 )}
