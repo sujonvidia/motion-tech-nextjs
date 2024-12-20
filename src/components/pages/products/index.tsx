@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import dynamic from 'next/dynamic';
 import { TH1, TP, ContentContainer, Stack, Price, Link } from '@/src/components/atoms';
 import { FullWidthButton, FullWidthSecondaryButton } from '@/src/components/molecules/Button';
 import { NotifyMeForm } from '@/src/components/molecules/NotifyMeForm';
@@ -20,6 +20,15 @@ import { ProductDescription } from '@/src/components/molecules/ProductDescriptio
 import { storefrontApiQuery } from '@/src/graphql/client';
 import { useChannels } from '@/src/state/channels';
 import { ProductVariantTileType, productVariantTileSelector } from '@/src/graphql/selectors';
+// import { Editor } from '@tinymce/tinymce-react';
+
+const Editor = dynamic(() => Promise.resolve(require('@tinymce/tinymce-react').Editor), { ssr: false });
+
+
+// Dynamically import the TinyMCE Editor component with proper typing
+// const EditorNoSSR = dynamic(() => import('@tinymce/tinymce-react').then((mod) => mod.Editor), {
+//   ssr: false, // Disable server-side rendering
+// });
 
 export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = props => {
     const { t } = useTranslation('products');
@@ -28,7 +37,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
     const { product, variant, addingError, productOptionsGroups, handleOptionClick, handleBuyNow, handleAddToCart } =
         useProduct();
 
-    console.log('ProductPage',product);
+    console.log('ProductPage', product);
     const breadcrumbs = [
         { name: breadcrumb('breadcrumbs.home'), href: '/' },
         { name: props.product.name, href: `/products/${props.product.slug}` },
@@ -62,9 +71,17 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
         fetchData();
     }, [product?.id]);
 
-    function makeAbsoluteUrls(htmlContent:string) {
+    function makeAbsoluteUrls(htmlContent: string) {
         return htmlContent.replace(/src="\.\.\/\.\.\/\.\.\//g, 'src="http://localhost:3000/');
-      }
+    }
+
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) return null; // Skip rendering on the server
 
     return (
         <Layout categories={props.collections} navigation={props.navigation}>
@@ -140,8 +157,8 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                         {!variant
                                             ? null
                                             : Number(variant.stockLevel) > 0
-                                              ? t('stock-levels.in-stock')
-                                              : t('stock-levels.out-of-stock')}
+                                                ? t('stock-levels.in-stock')
+                                                : t('stock-levels.out-of-stock')}
                                     </TP>
                                 </StockInfo>
                             </Stack>
@@ -197,7 +214,21 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                         children: (
                                             <TP color="subtitle" style={{ marginTop: '1.5rem' }}>
                                                 {product?.customFields?.landing ? (
-                                                    <div dangerouslySetInnerHTML={{ __html: makeAbsoluteUrls(product?.customFields?.landing || '') }} />
+                                                    <div suppressHydrationWarning>
+                                                        <Editor
+                                                            apiKey="d1hzqw9ym2dak60p72jjeq0iqypm8vtd44xtzwhv05kkp9r7" // Replace with your TinyMCE API key
+                                                            initialValue={product?.customFields?.landing} // Use landing content directly
+                                                            init={{
+                                                                height: 500,
+                                                                menubar: false, // Hide menubar
+                                                                toolbar: false, // Hide toolbar
+                                                                statusbar: false, // Hide status bar
+                                                                // readonly: true, // Make the editor read-only
+                                                                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }', // Customize styling
+                                                                inline: true, // Make the editor inline (not a full block editor)
+                                                            }}
+                                                        />
+                                                    </div>
                                                 ) : (
                                                     <span>{t('description')}</span> // Fallback if `landing` is undefined
                                                 )}
@@ -246,7 +277,7 @@ const StickyLeft = styled(Stack)`
     }
 `;
 
-const StockInfo = styled(Stack)<{ outOfStock?: boolean; comingSoon?: boolean }>`
+const StockInfo = styled(Stack) <{ outOfStock?: boolean; comingSoon?: boolean }>`
     white-space: nowrap;
     color: ${p => (p.outOfStock ? p.theme.error : p.comingSoon ? p.theme.gray(800) : 'inherit')};
     width: max-content;
