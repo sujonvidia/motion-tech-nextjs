@@ -197,3 +197,25 @@ a {
 .MediaGalleryWidget__scrollButton--left {
   left: 12px !important;
 }
+
+/* Keen Slider Container */
+.keen-slider {
+    border-radius: 10px;
+    padding: 5px;
+}
+
+/* Keen Slider Slides */
+.keen-slider__slide {
+    border-radius: 10px; /* Rounded corners */
+    background: #ffffff; /* Subtle white background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle default shadow */
+    transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s; /* Smooth animations */
+}
+
+/* Hover Effect */
+.keen-slider__slide:hover {
+    transform: scale(1.02); /* Slight hover zoom effect */
+    background: linear-gradient(135deg, #e0f7fa, #e1bee7); /* Gradient hover background */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.15); /* Colorful, deeper shadow */
+}
+
