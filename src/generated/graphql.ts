@@ -394,6 +394,14 @@ export type CreateCustomerInput = {
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CreateSellerInput = {
+  customFields?: InputMaybe<Scalars['JSON']['input']>;
+  emailAddress: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 /**
  * @description
  * ISO 4217 currency code
@@ -1712,6 +1720,7 @@ export type Mutation = {
    * 3. The Customer _must_ be registered _with_ a password. No further action is needed - the Customer is able to authenticate immediately.
    */
   registerCustomerAccount: RegisterCustomerAccountResult;
+  registerNewSeller?: Maybe<Channel>;
   /** Remove all OrderLine from the Order */
   removeAllOrderLines: RemoveOrderItemsResult;
   /** Removes the given coupon code from the active Order */
@@ -1819,6 +1828,11 @@ export type MutationRefreshCustomerVerificationArgs = {
 
 export type MutationRegisterCustomerAccountArgs = {
   input: RegisterCustomerInput;
+};
+
+
+export type MutationRegisterNewSellerArgs = {
+  input: RegisterSellerInput;
 };
 
 
@@ -2997,6 +3011,11 @@ export type RegisterCustomerInput = {
   password?: InputMaybe<Scalars['String']['input']>;
   phoneNumber?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type RegisterSellerInput = {
+  seller: CreateSellerInput;
+  shopName: Scalars['String']['input'];
 };
 
 export type RelationCustomFieldConfig = CustomField & {

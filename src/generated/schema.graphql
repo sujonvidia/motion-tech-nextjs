@@ -352,6 +352,14 @@ input CreateCustomerInput {
   title: String
 }
 
+input CreateSellerInput {
+  customFields: JSON
+  emailAddress: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
 """
 @description
 ISO 4217 currency code
@@ -2003,6 +2011,7 @@ type Mutation {
   3. The Customer _must_ be registered _with_ a password. No further action is needed - the Customer is able to authenticate immediately.
   """
   registerCustomerAccount(input: RegisterCustomerInput!): RegisterCustomerAccountResult!
+  registerNewSeller(input: RegisterSellerInput!): Channel
 
   """Remove all OrderLine from the Order"""
   removeAllOrderLines: RemoveOrderItemsResult!
@@ -3268,6 +3277,11 @@ input RegisterCustomerInput {
   password: String
   phoneNumber: String
   title: String
+}
+
+input RegisterSellerInput {
+  seller: CreateSellerInput!
+  shopName: String!
 }
 
 type RelationCustomFieldConfig implements CustomField {
