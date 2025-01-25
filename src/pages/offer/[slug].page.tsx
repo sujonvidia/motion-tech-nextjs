@@ -5,6 +5,8 @@ import { getStaticPaths } from '@/src/components/pages/products/paths';
 import { ProductPage } from '@/src/components/pages/products'; // Reuse the existing ProductPage component
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
+import { CheckoutPage } from '@/src/components/pages/checkout'; // Import the CheckoutPage component
+import { CheckoutProvider } from '@/src/state/checkout';
 
 const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
     const product = props.product;
@@ -18,20 +20,27 @@ const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
     }
 
     return (
+        <CheckoutProvider>
         <Wrapper>
             <ContentContainer>
-                {/* Render the landing content first */}
+                {/* Render the landing content */}
                 <LandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
                 
-                {/* Include other product-specific details if needed */}
+                {/* Include product-specific details */}
                 <AdditionalDetails>
                     <h2>{product.name}</h2>
                     {product.variants.length > 0 && (
                         <p>Price: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
                     )}
                 </AdditionalDetails>
+                
+                {/* Render the checkout page below the landing content */}
+                <CheckoutContainer>
+                    <CheckoutPage />
+                </CheckoutContainer>
             </ContentContainer>
         </Wrapper>
+        </CheckoutProvider>
     );
 };
 
@@ -70,4 +79,10 @@ const AdditionalDetails = styled.div`
     p {
         font-size: 1rem;
     }
+`;
+
+const CheckoutContainer = styled.div`
+    margin-top: 3rem;
+    border-top: 2px solid #ccc;
+    padding-top: 2rem;
 `;
