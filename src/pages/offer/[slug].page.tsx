@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { InferGetStaticPropsType } from 'next';
 import { getStaticProps } from '@/src/components/pages/products/props';
 import { getStaticPaths } from '@/src/components/pages/products/paths';
-import { ProductPage } from '@/src/components/pages/products'; // Reuse the existing ProductPage component
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
-import { CheckoutPage } from '@/src/components/pages/checkout'; // Import the CheckoutPage component
 import { CheckoutProvider } from '@/src/state/checkout';
+import dynamic from 'next/dynamic';
+
+// Fix the dynamic import of CheckoutPage
+const CheckoutPage = dynamic(() =>
+    import('@/src/components/pages/checkout').then((mod) => mod.CheckoutPage), 
+    { ssr: false }
+);
 
 const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
     const product = props.product;
+    const [clientReady, setClientReady] = useState(false);
+
+    useEffect(() => {
+        setClientReady(true);
+    }, []);
 
     if (!product?.customFields?.landing) {
         return (
@@ -21,33 +31,35 @@ const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
 
     return (
         <CheckoutProvider>
-        <Wrapper>
-            <ContentContainer>
-                {/* Render the landing content */}
-                <LandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
-                
-                {/* Include product-specific details */}
-                <AdditionalDetails>
-                    <h2>{product.name}</h2>
-                    {product.variants.length > 0 && (
-                        <p>Price: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
+            <Wrapper>
+                <ContentContainer>
+                    {/* Render the landing content */}
+                    <LandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
+
+                    {/* Include product-specific details */}
+                    <AdditionalDetails>
+                        <h2>{product.name}</h2>
+                        {product.variants.length > 0 && (
+                            <p>Price: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
+                        )}
+                    </AdditionalDetails>
+
+                    {/* Render the checkout page below the landing content */}
+                    {clientReady && (
+                        <CheckoutContainer>
+                            <CheckoutPage />
+                        </CheckoutContainer>
                     )}
-                </AdditionalDetails>
-                
-                {/* Render the checkout page below the landing content */}
-                <CheckoutContainer>
-                    <CheckoutPage />
-                </CheckoutContainer>
-            </ContentContainer>
-        </Wrapper>
+                </ContentContainer>
+            </Wrapper>
         </CheckoutProvider>
     );
 };
 
 export default LandingPage;
-
 export { getStaticProps, getStaticPaths };
 
+// Styled components
 const Wrapper = styled.div`
     margin: 0 auto;
     padding: 2rem;
