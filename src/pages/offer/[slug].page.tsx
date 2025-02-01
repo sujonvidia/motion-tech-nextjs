@@ -1,25 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import type { InferGetStaticPropsType } from 'next';
-import { getStaticProps } from '@/src/components/pages/products/props';
+import type { InferGetStaticPropsType, GetStaticProps } from 'next';
+import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
 import { getStaticPaths } from '@/src/components/pages/products/paths';
+import { CheckoutPage } from '@/src/components/pages/checkout';
+import { CheckoutProvider } from '@/src/state/checkout';
+import { useCart } from '@/src/state/cart';
+import { useCheckout } from '@/src/state/checkout';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
-import { CheckoutProvider } from '@/src/state/checkout';
-import dynamic from 'next/dynamic';
 
-// Fix the dynamic import of CheckoutPage
-const CheckoutPage = dynamic(() =>
-    import('@/src/components/pages/checkout').then((mod) => mod.CheckoutPage), 
-    { ssr: false }
-);
-
-const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
-    const product = props.product;
-    const [clientReady, setClientReady] = useState(false);
+const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps>) => {
+    const { product } = props;
+    const { addToCart, fetchActiveOrder } = useCart(); 
+    const [activeOrder, setActiveOrder] = useState(null);
+    const [loading, setLoading] = useState(true); // ✅ Track loading state
+    const [initialLoad, setInitialLoad] = useState(true); // To avoid infinite loop
 
     useEffect(() => {
-        setClientReady(true);
-    }, []);
+        const fetchCheckoutData = async () => {
+            const order = await fetchActiveOrder();
+            debugger
+            if (order) {
+                setActiveOrder(order);
+                setLoading(false);
+            }
+        };
+
+        if (product?.variants.length > 0 && initialLoad) {
+            setInitialLoad(false); // Disable initial load flag
+            const productVariantId = product.variants[0].id;
+
+            if (!activeOrder?.lines?.some(line => line.productVariant.id === productVariantId)) {
+                addToCart(productVariantId, 1).then(() => {
+                    fetchCheckoutData();
+                });
+            } else {
+                fetchCheckoutData();
+            }
+        }
+    }, [product, activeOrder, initialLoad]); // Add initialLoad to dependency array
 
     if (!product?.customFields?.landing) {
         return (
@@ -44,10 +64,12 @@ const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
                         )}
                     </AdditionalDetails>
 
-                    {/* Render the checkout page below the landing content */}
-                    {clientReady && (
+                    {/* ✅ Ensure Order Summary updates dynamically */}
+                    {loading ? (
+                        <p>Loading Order Summary...</p>
+                    ) : (
                         <CheckoutContainer>
-                            <CheckoutPage />
+                            <CheckoutPage activeOrder={activeOrder} />
                         </CheckoutContainer>
                     )}
                 </ContentContainer>
@@ -57,9 +79,31 @@ const LandingPage = (props: InferGetStaticPropsType<typeof getStaticProps>) => {
 };
 
 export default LandingPage;
-export { getStaticProps, getStaticPaths };
 
-// Styled components
+export const getStaticProps: GetStaticProps = async (context) => {
+    const { params, locale } = context;
+
+    if (!params?.slug || (Array.isArray(params.slug) && params.slug.length === 0)) {
+        return { notFound: true };
+    }
+
+    const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+    const channel = 'cgyub4spjr2ycq17h6x';
+
+    const productProps = await productGetStaticProps({
+        params: { slug, locale: locale ?? 'en', channel },
+    });
+
+    return {
+        props: {
+            ...productProps.props,
+            ...(await serverSideTranslations(locale ?? 'en', ['checkout'])),
+        },
+    };
+};
+
+export { getStaticPaths };
+
 const Wrapper = styled.div`
     margin: 0 auto;
     padding: 2rem;
