@@ -62,6 +62,7 @@ const isAddressesEqual = (a: object, b?: object) => {
 export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods }) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
+    console.log('checkout:activeOrder',activeOrder);
 
     const { t } = useTranslation('checkout');
     const { t: tErrors } = useTranslation('common');

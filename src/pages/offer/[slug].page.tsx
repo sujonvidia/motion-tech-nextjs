@@ -3,48 +3,44 @@ import type { InferGetStaticPropsType, GetStaticProps } from 'next';
 import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
 import { getStaticPaths } from '@/src/components/pages/products/paths';
 import { CheckoutPage } from '@/src/components/pages/checkout';
-import { CheckoutProvider } from '@/src/state/checkout';
+import { CheckoutProvider, useCheckout } from '@/src/state/checkout';
 import { useCart } from '@/src/state/cart';
-import { useCheckout } from '@/src/state/checkout';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
 
 const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps>) => {
+    const { t } = useTranslation('checkout'); // ✅ Ensures translations are loaded
     const { product } = props;
-    const { addToCart, fetchActiveOrder } = useCart(); 
-    const [activeOrder, setActiveOrder] = useState(null);
-    const [loading, setLoading] = useState(true); // ✅ Track loading state
-    const [initialLoad, setInitialLoad] = useState(true); // To avoid infinite loop
+    const { addToCart, fetchActiveOrder } = useCart();
+    const [loading, setLoading] = useState(true);
+    const [hasAddedToCart, setHasAddedToCart] = useState(false); // ✅ Prevent infinite loop
 
     useEffect(() => {
-        const fetchCheckoutData = async () => {
+        const fetchOrderData = async () => {
             const order = await fetchActiveOrder();
-            debugger
-            if (order) {
-                setActiveOrder(order);
+
+            // ✅ Check if the product is already in the order
+            const isProductInOrder = order?.lines?.some(line => line.productVariant.id === product?.variants[0]?.id);
+
+            if (!isProductInOrder && product?.variants.length > 0 && !hasAddedToCart) {
+                const productVariantId = product.variants[0].id;
+
+                setHasAddedToCart(true);
+                addToCart(productVariantId, 1).then(fetchOrderData); // ✅ Add product & refresh order
+            } else {
                 setLoading(false);
             }
         };
 
-        if (product?.variants.length > 0 && initialLoad) {
-            setInitialLoad(false); // Disable initial load flag
-            const productVariantId = product.variants[0].id;
-
-            if (!activeOrder?.lines?.some(line => line.productVariant.id === productVariantId)) {
-                addToCart(productVariantId, 1).then(() => {
-                    fetchCheckoutData();
-                });
-            } else {
-                fetchCheckoutData();
-            }
-        }
-    }, [product, activeOrder, initialLoad]); // Add initialLoad to dependency array
+        fetchOrderData();
+    }, [product]); // ✅ Prevents infinite loops
 
     if (!product?.customFields?.landing) {
         return (
             <Wrapper>
-                <p>Landing content is not available for this product.</p>
+                <p>{t('landingPage.notAvailable', 'Landing content is not available for this product.')}</p>
             </Wrapper>
         );
     }
@@ -53,28 +49,36 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
         <CheckoutProvider>
             <Wrapper>
                 <ContentContainer>
-                    {/* Render the landing content */}
-                    <LandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
+                    {/* ✅ Render the landing content safely */}
+                    <StyledLandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
 
-                    {/* Include product-specific details */}
+                    {/* ✅ Product Details */}
                     <AdditionalDetails>
                         <h2>{product.name}</h2>
                         {product.variants.length > 0 && (
-                            <p>Price: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
+                            <p>{t('price', 'Price')}: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
                         )}
                     </AdditionalDetails>
 
                     {/* ✅ Ensure Order Summary updates dynamically */}
-                    {loading ? (
-                        <p>Loading Order Summary...</p>
-                    ) : (
-                        <CheckoutContainer>
-                            <CheckoutPage activeOrder={activeOrder} />
-                        </CheckoutContainer>
-                    )}
+                    <CheckoutContent loading={loading} />
                 </ContentContainer>
             </Wrapper>
         </CheckoutProvider>
+    );
+};
+
+// ✅ Separate component to avoid "useCheckout()" outside provider
+const CheckoutContent = ({ loading }: { loading: boolean }) => {
+    const { activeOrder } = useCheckout(); // ✅ Now correctly inside CheckoutProvider
+    const { t } = useTranslation('checkout'); // ✅ Ensure translations are available
+
+    return loading ? (
+        <p>{t('orderSummary.loading', 'Loading Order Summary...')}</p>
+    ) : (
+        <CheckoutContainer>
+            <CheckoutPage activeOrder={activeOrder} />
+        </CheckoutContainer>
     );
 };
 
@@ -97,13 +101,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
     return {
         props: {
             ...productProps.props,
-            ...(await serverSideTranslations(locale ?? 'en', ['checkout'])),
+            ...(await serverSideTranslations(locale ?? 'en', ['checkout'])), // ✅ Loads translations
         },
     };
 };
 
 export { getStaticPaths };
 
+// ✅ Styled components
 const Wrapper = styled.div`
     margin: 0 auto;
     padding: 2rem;
@@ -111,7 +116,7 @@ const Wrapper = styled.div`
     font-family: Arial, sans-serif;
 `;
 
-const LandingContent = styled.div`
+const StyledLandingContent = styled.div`
     margin-bottom: 2rem;
     font-size: 16px;
     line-height: 1.5;
