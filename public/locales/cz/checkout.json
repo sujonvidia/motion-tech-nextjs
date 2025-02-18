@@ -87,6 +87,7 @@
     "confirmation": {
         "orderReceived": "Vaše objednávka <1>{{code}}</1> byla přijata",
         "orderCancelled": "Vaše objednávka <1>{{code}}</1> byla zrušena",
-        "orderNotFound": "Objednávka nebyla nalezena"
+        "orderNotFound": "Objednávka nebyla nalezena",
+        
     }
 }

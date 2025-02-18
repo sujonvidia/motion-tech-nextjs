@@ -155,6 +155,9 @@
     "confirmation": {
         "orderReceived": "Your order <1>{{code}}</1> has been received",
         "orderCancelled": "Your order <1>{{code}}</1> has been cancelled",
-        "orderNotFound": "Order not found"
+        "orderNotFound": "Order not found",
+        "thankYouMessage": "Thank you for choosing us! We're processing your order.",
+        "callCenterNotice": "You will receive a call from our call center shortly to confirm your order.",
+        "haveANiceDay": "We hope you have a wonderful day ahead!"
     }
 }

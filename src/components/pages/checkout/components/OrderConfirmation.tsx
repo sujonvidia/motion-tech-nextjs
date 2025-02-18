@@ -45,12 +45,26 @@ export const OrderConfirmation: React.FC<{ code: string; order?: OrderType }> = 
                                     t={t}
                                 />
                             ) : (
+                                <>
                                 <Trans
                                     i18nKey="confirmation.orderReceived"
                                     t={t}
                                     values={{ code }}
                                     components={{ 1: <strong></strong> }}
                                 />
+                                
+                                <TP size="2rem" style={{ marginTop: '2rem', textAlign: 'left' }}>
+                                    <Trans i18nKey="confirmation.thankYouMessage" t={t} components={{ 0: <strong></strong> }} />
+                                </TP>
+
+                                <TP size="2rem" style={{ textAlign: 'left' }}>
+                                    <Trans i18nKey="confirmation.callCenterNotice" t={t} components={{ 0: <strong></strong> }} />
+                                </TP>
+
+                                <TP size="2rem" style={{ marginTop: '1rem', textAlign: 'left' }}>
+                                    <Trans i18nKey="confirmation.haveANiceDay" t={t} components={{ 0: <strong></strong> }} />
+                                </TP>
+                                </>
                             )}
                         </TP>
                     </Stack>
