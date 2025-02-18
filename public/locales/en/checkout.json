@@ -156,8 +156,8 @@
         "orderReceived": "Your order <1>{{code}}</1> has been received",
         "orderCancelled": "Your order <1>{{code}}</1> has been cancelled",
         "orderNotFound": "Order not found",
-        "thankYouMessage": "Thank you for choosing us! We're processing your order.",
-        "callCenterNotice": "You will receive a call from our call center shortly to confirm your order.",
-        "haveANiceDay": "We hope you have a wonderful day ahead!"
+        "thankYouMessage": "আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।",
+        "callCenterNotice": "আমাদের কল সেন্টার থেকে ফোন করে আপনার অর্ডারটি কনফার্ম করা হবে।",
+        "haveANiceDay": "ভালো থাকুন, সুস্থ থাকুন।"
     }
 }
