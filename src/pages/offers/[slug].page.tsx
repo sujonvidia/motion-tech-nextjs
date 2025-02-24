@@ -6,27 +6,29 @@ import { CheckoutPage } from '@/src/components/pages/checkout';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
+import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
 
 // Combine both product and checkout data fetching into one getServerSideProps
 export const getServerSideProps = async (context: any) => {
     // Fetch product data (static props)
     const productData = await productGetStaticProps(context);
-    console.log("productData",productData);
-
     // Fetch checkout data (server-side props)
     const checkoutData = await checkoutGetServerSideProps(context);
-    console.log("checkoutData",checkoutData);
+    console.log("checkoutData:offer:", checkoutData.props);
 
     return {
         props: {
             ...productData.props, // Merged product data
             ...checkoutData.props, // Merged checkout data
+            eligiblePaymentMethods: checkoutData.props.eligiblePaymentMethods || [],
             ...(await serverSideTranslations(context.locale ?? 'en', ['checkout'])),
         },
     };
 };
 
-const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout, ...props }) => {
+const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout,eligiblePaymentMethods,
+    stripeData, ...props }) => {
+        // console.log('availablePaymentMethods:offer:',eligiblePaymentMethods);
     return (
         <Wrapper>
             {/* Product Landing Content */}
@@ -38,6 +40,8 @@ const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 
             {/* Checkout Page */}
             <CheckoutPage {...props} />
+            {/* Payment Page */}
+            <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={stripeData} />
         </Wrapper>
     );
 };

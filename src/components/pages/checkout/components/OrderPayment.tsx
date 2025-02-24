@@ -64,9 +64,11 @@ export const OrderPayment: React.FC<OrderPaymentProps> = ({ availablePaymentMeth
     }, []);
 
     const defaultMethod = availablePaymentMethods?.find(m => m.code === 'standard-payment');
+    console.log('availablePaymentMethods',availablePaymentMethods);
 
     const standardMethod = async (method: string, metadata: StandardMethodMetadata) => {
         try {
+            debugger
             setError(null);
             const { addPaymentToOrder } = await storefrontApiMutation(ctx)({
                 addPaymentToOrder: [
@@ -119,6 +121,7 @@ export const OrderPayment: React.FC<OrderPaymentProps> = ({ availablePaymentMeth
     };
 
     const onSubmit: SubmitHandler<FormValues> = async data => {
+        debugger;
         if (!defaultMethod) {
             return;
         }

@@ -31,7 +31,7 @@ export const CustomHelmet: React.FC<{
     }
 
     const seo = {
-        name: 'Aexol Demo Store',
+        name: 'Motion Mart Store',
         description: metaDescription,
         pageUrl: `${asPath}`,
         keywords: [
