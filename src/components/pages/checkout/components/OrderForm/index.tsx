@@ -31,6 +31,7 @@ import { baseCountryFromLanguage } from '@/src/util/baseCountryFromLanguage';
 import { OrderSummary } from '../OrderSummary';
 import { useChannels } from '@/src/state/channels';
 import { Tooltip } from '@/src/components/molecules/Tooltip';
+import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
 
 type FormValues = CreateCustomerType & {
     deliveryMethod?: string;
@@ -49,6 +50,7 @@ interface OrderFormProps {
     availableCountries?: AvailableCountriesType[];
     activeCustomer: ActiveCustomerType | null;
     shippingMethods: ShippingMethodType[] | null;
+    eligiblePaymentMethods: any
 }
 
 const isAddressesEqual = (a: object, b?: object) => {
@@ -59,7 +61,13 @@ const isAddressesEqual = (a: object, b?: object) => {
     }
 };
 
-export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods }) => {
+type StandardMethodMetadata = {
+    shouldDecline: boolean;
+    shouldError: boolean;
+    shouldErrorOnSettle: boolean;
+};
+
+export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods, eligiblePaymentMethods }) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
     // console.log('checkout:activeOrder',activeOrder);
@@ -125,6 +133,64 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             : undefined,
         resolver: zodResolver(schema),
     });
+
+    // Copy standardMethod from OrderPayment.tsx to OrderForm.tsx
+    const standardMethod = async (method: string, metadata: StandardMethodMetadata) => {
+        try {
+            // setError(null);
+            const { addPaymentToOrder } = await storefrontApiMutation(ctx)({
+                addPaymentToOrder: [
+                    { input: { method, metadata } },
+                    {
+                        __typename: true,
+                        '...on Order': { state: true, code: true },
+                        '...on IneligiblePaymentMethodError': {
+                            message: true,
+                            errorCode: true,
+                            eligibilityCheckerMessage: true,
+                        },
+                        '...on NoActiveOrderError': {
+                            message: true,
+                            errorCode: true,
+                        },
+                        '...on OrderPaymentStateError': {
+                            message: true,
+                            errorCode: true,
+                        },
+                        '...on OrderStateTransitionError': {
+                            message: true,
+                            errorCode: true,
+                            fromState: true,
+                            toState: true,
+                            transitionError: true,
+                        },
+                        '...on PaymentDeclinedError': {
+                            errorCode: true,
+                            message: true,
+                            paymentErrorMessage: true,
+                        },
+                        '...on PaymentFailedError': {
+                            errorCode: true,
+                            message: true,
+                            paymentErrorMessage: true,
+                        },
+                    },
+                ],
+            });
+
+            debugger;
+            console.log('addPaymentToOrder',addPaymentToOrder);
+
+            // if (addPaymentToOrder.__typename !== 'Order') {
+            //     // setError(tError(`errors.backend.${addPaymentToOrder.errorCode}`));
+            // // } else if (POSITIVE_DEFAULT_PAYMENT_STATUSES.includes(addPaymentToOrder.state)) {
+                push(`/checkout/confirmation/${addPaymentToOrder.code}`);
+            // }
+        } catch (e) {
+            console.log(e);
+            // setError(tError(`errors.backend.UNKNOWN_ERROR`));
+        }
+    };
 
     const onSubmit: SubmitHandler<FormValues> = async ({
         emailAddress,
@@ -293,8 +359,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                 setError('root', { message: tErrors(`errors.backend.${transitionOrderToState.errorCode}`) });
                 return;
             }
+
+            await standardMethod("standard-payment", {
+                amount: transitionOrderToState.totalWithTax, // Using the total amount
+            });
             // Redirect to payment page
-            push('/checkout/payment');
+            // push('/checkout/payment');
         } catch (error) {
             setError('root', { message: tErrors(`errors.backend.UNKNOWN_ERROR`) });
         }
@@ -336,6 +406,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                         }
                         footer={
                             <Stack column gap="2.5rem" justifyCenter itemsCenter>
+                                <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} />
                                 <StyledButton loading={isSubmitting} type="submit">
                                     <TP color="contrast" upperCase>
                                         {t('orderForm.continueToPayment')}
@@ -345,6 +416,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                             </Stack>
                         }
                     />
+                    
                     <Stack w100 column gap="2rem">
                         <Stack column gap="0.5rem">
                             {/* Customer Part */}
@@ -660,6 +732,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                             </AnimatePresence>
                         </Stack>
                     </Stack>
+                    
                 </Container>
             </Form>
         </Stack>

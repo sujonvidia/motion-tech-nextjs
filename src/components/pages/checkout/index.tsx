@@ -7,10 +7,11 @@ import { getServerSideProps } from './props';
 import { CheckoutCarousel } from './components/OrderSummary/CheckoutCarousel';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
+import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
 
 export const CheckoutPage: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = props => {
     const { t } = useTranslation('checkout');
-    const { availableCountries, alsoBoughtProducts, eligibleShippingMethods, activeCustomer } = props;
+    const { availableCountries, alsoBoughtProducts, eligibleShippingMethods, activeCustomer, eligiblePaymentMethods } = props;
 
     return (
         <CheckoutLayout pageTitle={`${t('seoTitles.checkout')}`}>
@@ -19,7 +20,9 @@ export const CheckoutPage: React.FC<InferGetServerSidePropsType<typeof getServer
                     availableCountries={availableCountries}
                     shippingMethods={eligibleShippingMethods}
                     activeCustomer={activeCustomer}
+                    eligiblePaymentMethods={eligiblePaymentMethods}
                 />
+                {/* <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} /> */}
                 <CheckoutCarousel alsoBoughtProducts={alsoBoughtProducts} />
             </Content>
         </CheckoutLayout>

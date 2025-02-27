@@ -6,7 +6,6 @@ import { CheckoutPage } from '@/src/components/pages/checkout';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
-import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
 
 // Combine both product and checkout data fetching into one getServerSideProps
 export const getServerSideProps = async (context: any) => {
@@ -14,7 +13,7 @@ export const getServerSideProps = async (context: any) => {
     const productData = await productGetStaticProps(context);
     // Fetch checkout data (server-side props)
     const checkoutData = await checkoutGetServerSideProps(context);
-    console.log("checkoutData:offer:", checkoutData.props);
+    console.log("checkoutData:offer:", checkoutData);
 
     return {
         props: {
@@ -26,9 +25,8 @@ export const getServerSideProps = async (context: any) => {
     };
 };
 
-const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout,eligiblePaymentMethods,
-    stripeData, ...props }) => {
-        // console.log('availablePaymentMethods:offer:',eligiblePaymentMethods);
+const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout, eligiblePaymentMethods, ...props }) => {
+    console.log('getServerSideProps:', props);
     return (
         <Wrapper>
             {/* Product Landing Content */}
@@ -39,9 +37,9 @@ const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = (
             )}
 
             {/* Checkout Page */}
-            <CheckoutPage {...props} />
+            <CheckoutPage eligiblePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} {...props} />
             {/* Payment Page */}
-            <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={stripeData} />
+           
         </Wrapper>
     );
 };
