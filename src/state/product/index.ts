@@ -83,6 +83,7 @@ const useProductContainer = createContainer<ProductContainerType, { product: Pro
     };
 
     const handleAddToCart = async () => {
+        debugger;
         if (variant?.id) await addToCart(variant.id, 1, true);
         else setAddingError(t('select-options'));
     };

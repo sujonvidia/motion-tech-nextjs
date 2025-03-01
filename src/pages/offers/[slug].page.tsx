@@ -1,48 +1,89 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { InferGetServerSidePropsType } from 'next';
+import { useRouter } from 'next/router';
 import { getServerSideProps as checkoutGetServerSideProps } from '@/src/components/pages/checkout/props';
 import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
 import { CheckoutPage } from '@/src/components/pages/checkout';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
+import { useCart, CartProvider } from '@/src/state/cart';
+import { useCheckout } from '@/src/state/checkout';
+
 
 // Combine both product and checkout data fetching into one getServerSideProps
 export const getServerSideProps = async (context: any) => {
-    // Fetch product data (static props)
-    const productData = await productGetStaticProps(context);
-    // Fetch checkout data (server-side props)
     const checkoutData = await checkoutGetServerSideProps(context);
-    console.log("checkoutData:offer:", checkoutData);
-
+    const productData = await productGetStaticProps(context);
+   
+    console.log('offer->getServerSideProps',productData, checkoutData);
     return {
         props: {
-            ...productData.props, // Merged product data
-            ...checkoutData.props, // Merged checkout data
-            eligiblePaymentMethods: checkoutData.props.eligiblePaymentMethods || [],
+            ...productData.props,
+            ...checkoutData.props,
             ...(await serverSideTranslations(context.locale ?? 'en', ['checkout'])),
         },
     };
 };
 
-const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout, eligiblePaymentMethods, ...props }) => {
-    console.log('getServerSideProps:', props);
+const PageContent: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ 
+    product, 
+    ...props 
+}) => {
+    const { addToCart, cart } = useCart(); // ✅ Get cart state
+    const { addToCheckout } = useCheckout();
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [variantId, setVariantId] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (router.isReady) {
+            setVariantId(router.query.variant as string);
+        }
+    }, [router.isReady, router.query]);
+
+    useEffect(() => {
+        const addVariantAndProceed = async () => {
+            debugger;
+            if (variantId) {
+                console.log('Adding variant to cart:', variantId);
+                // await addToCart(variantId, 1, true);
+                await addToCheckout(variantId, 1);
+            }
+            setTimeout(() => {
+                setLoading(true); // ✅ Ensure loading is false only after addToCart completes       
+            }, 1000);
+            
+        };
+
+        if (variantId) {
+            addVariantAndProceed();
+        } 
+        // else {
+        //     setLoading(false);
+        // }
+    }, [variantId]);
+
     return (
         <Wrapper>
-            {/* Product Landing Content */}
             {product?.customFields?.landing && (
                 <ContentContainer>
                     <StyledLandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
                 </ContentContainer>
             )}
 
-            {/* Checkout Page */}
-            <CheckoutPage eligiblePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} {...props} />
-            {/* Payment Page */}
-           
+            {/* ✅ Checkout page only loads when loading is false */}
+            {loading && <CheckoutPage {...props} />}
         </Wrapper>
     );
 };
+
+// ✅ Wrap PageContent inside CartProvider
+const Page = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => (
+    // <CartProvider>
+        <PageContent {...props} />
+    // </CartProvider>
+);
 
 export default Page;
 

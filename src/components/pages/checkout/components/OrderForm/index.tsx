@@ -31,7 +31,7 @@ import { baseCountryFromLanguage } from '@/src/util/baseCountryFromLanguage';
 import { OrderSummary } from '../OrderSummary';
 import { useChannels } from '@/src/state/channels';
 import { Tooltip } from '@/src/components/molecules/Tooltip';
-import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
+// import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPayment';
 
 type FormValues = CreateCustomerType & {
     deliveryMethod?: string;
@@ -50,7 +50,7 @@ interface OrderFormProps {
     availableCountries?: AvailableCountriesType[];
     activeCustomer: ActiveCustomerType | null;
     shippingMethods: ShippingMethodType[] | null;
-    eligiblePaymentMethods: any
+    // eligiblePaymentMethods: any
 }
 
 const isAddressesEqual = (a: object, b?: object) => {
@@ -67,10 +67,10 @@ type StandardMethodMetadata = {
     shouldErrorOnSettle: boolean;
 };
 
-export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods, eligiblePaymentMethods }) => {
+export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods }) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
-    // console.log('checkout:activeOrder',activeOrder);
+    console.log('OrderForm->shippingMethods',shippingMethods);
 
     const { t } = useTranslation('checkout');
     const { t: tErrors } = useTranslation('common');
@@ -206,6 +206,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
         password,
     }) => {
         try {
+            debugger;
             if (deliveryMethod && activeOrder?.shippingLines[0]?.shippingMethod.id !== deliveryMethod) {
                 await changeShippingMethod(deliveryMethod);
             }
@@ -406,7 +407,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                         }
                         footer={
                             <Stack column gap="2.5rem" justifyCenter itemsCenter>
-                                <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} />
+                                {/* <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} /> */}
                                 <StyledButton loading={isSubmitting} type="submit">
                                     <TP color="contrast" upperCase>
                                         {t('orderForm.continueToPayment')}

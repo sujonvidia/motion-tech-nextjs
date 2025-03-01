@@ -27,9 +27,10 @@ const useCartContainer = createContainer(() => {
     };
 
     const addToCart = async (id: string, q: number, o?: boolean) => {
-        setActiveOrder(c => {
-            return c && { ...c, totalQuantity: c.totalQuantity + 1 };
-        });
+        debugger;
+        // setActiveOrder(c => {
+        //     return c && { ...c, totalQuantity: c.totalQuantity + 1 };
+        // });
         try {
             const { addItemToOrder } = await storefrontApiMutation(ctx)({
                 addItemToOrder: [

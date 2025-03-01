@@ -16,8 +16,8 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     const translationRedirect = redirectFromDefaultChannelSSR(context);
     if (translationRedirect) return translationRedirect;
 
-    const homePageRedirect = prepareSSRRedirect('/')(context);
-    const paymentRedirect = prepareSSRRedirect('/checkout/payment')(context);
+    // const homePageRedirect = prepareSSRRedirect('/')(context);
+    // const paymentRedirect = prepareSSRRedirect('/checkout/payment')(context);
     const api = SSRQuery(context);
 
     try {
@@ -27,7 +27,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             { activeCustomer },
             { eligibleShippingMethods },
             { collection: alsoBoughtProducts },
-            { eligiblePaymentMethods }
+            // { eligiblePaymentMethods }
             
         ] = await Promise.all([
             api({ activeOrder: ActiveOrderSelector }),
@@ -35,16 +35,16 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             api({ activeCustomer: ActiveCustomerSelector }),
             api({ eligibleShippingMethods: ShippingMethodsSelector }),
             api({ collection: [{ slug: 'all' }, homePageSlidersSelector] }),
-            api({ eligiblePaymentMethods: AvailablePaymentMethodsSelector }),
+            // api({ eligiblePaymentMethods: AvailablePaymentMethodsSelector }),
         ]);
 
-        if (checkout?.state === 'ArrangingPayment') {
-            return paymentRedirect;
-        }
+        // if (checkout?.state === 'ArrangingPayment') {
+        //     return paymentRedirect;
+        // }
 
-        if (!checkout || checkout.lines.length === 0) {
-            return homePageRedirect;
-        }
+        // if (!checkout || checkout.lines.length === 0) {
+        //     return homePageRedirect;
+        // }
 
         const returnedStuff = {
             ...r.props,
@@ -54,11 +54,11 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             alsoBoughtProducts: alsoBoughtProducts?.productVariants.items ?? null,
             activeCustomer: activeCustomer ?? null,
             eligibleShippingMethods: eligibleShippingMethods ?? null,
-            eligiblePaymentMethods: eligiblePaymentMethods ?? [],
+            // eligiblePaymentMethods: eligiblePaymentMethods ?? [],
         };
 
         return { props: returnedStuff };
     } catch (e) {
-        return homePageRedirect;
+        // return homePageRedirect;
     }
 };

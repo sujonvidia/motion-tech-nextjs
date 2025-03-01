@@ -12,11 +12,14 @@ import { useChannels } from '../channels';
 //Prepared for future use *in feature checkout can be different than cart
 //Additional useCart is on client side, because it is used in many places
 const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: ActiveOrderType }>(initialState => {
-    if (!initialState?.checkout) return emptyCheckoutState;
+    // if (!initialState?.checkout) return emptyCheckoutState;
     const ctx = useChannels();
     const [activeOrder, setActiveOrder] = useState<ActiveOrderType>(initialState.checkout);
+    console.log('checkout->activeOrder:',activeOrder)
 
     const addToCheckout = async (id: string, q: number) => {
+        debugger;
+        console.log('checkout->addToCheckout',id);
         try {
             const { addItemToOrder } = await storefrontApiMutation(ctx)({
                 addItemToOrder: [

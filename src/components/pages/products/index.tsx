@@ -34,8 +34,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
     const { t } = useTranslation('products');
     const { t: breadcrumb } = useTranslation('common');
     const ctx = useChannels();
-    const { product, variant, addingError, productOptionsGroups, handleOptionClick, handleBuyNow, handleAddToCart } =
-        useProduct();
+    const { product, variant, addingError, productOptionsGroups, handleOptionClick, handleBuyNow, handleAddToCart } = useProduct();
 
     console.log('ProductPage', product);
     const breadcrumbs = [

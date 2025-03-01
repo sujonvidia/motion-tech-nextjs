@@ -18,14 +18,8 @@ const App = ({ Component, pageProps }: AppProps) => {
     return (
         <ThemeProvider theme={LightTheme}>
             <ChannelsProvider initialState={{ channel: pageProps.channel, locale: pageProps.locale }}>
-                <Global styles={`body { font-family:${nunito.style.fontFamily}; }`} />
-                {/* `checkout` prop should exist only on routes with checkout functionally */}
-                {'checkout' in pageProps ? (
+                <CartProvider>
                     <CheckoutProvider initialState={{ checkout: pageProps.checkout }}>
-                        <Component {...pageProps} />
-                    </CheckoutProvider>
-                ) : (
-                    <CartProvider>
                         <ProductProvider
                             initialState={{
                                 product: 'product' in pageProps ? pageProps.product : undefined,
@@ -41,11 +35,12 @@ const App = ({ Component, pageProps }: AppProps) => {
                                     page: 'page' in pageProps ? pageProps.page : undefined,
                                     sort: 'sort' in pageProps ? pageProps.sort : undefined,
                                 }}>
+                                <Global styles={`body { font-family:${nunito.style.fontFamily}; }`} />
                                 <Component {...pageProps} />
                             </CollectionProvider>
                         </ProductProvider>
-                    </CartProvider>
-                )}
+                    </CheckoutProvider>
+                </CartProvider>
             </ChannelsProvider>
         </ThemeProvider>
     );
