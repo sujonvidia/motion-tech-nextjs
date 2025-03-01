@@ -18,8 +18,7 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
     console.log('checkout->activeOrder:',activeOrder)
 
     const addToCheckout = async (id: string, q: number) => {
-        debugger;
-        console.log('checkout->addToCheckout',id);
+       
         try {
             const { addItemToOrder } = await storefrontApiMutation(ctx)({
                 addItemToOrder: [
@@ -47,7 +46,9 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
                 ],
             });
             if (addItemToOrder.__typename === 'Order') {
+                debugger;
                 setActiveOrder(addItemToOrder);
+                console.log('checkout->addToCheckout',id, addItemToOrder);
                 return;
             }
         } catch {
@@ -116,6 +117,7 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
     };
 
     const changeShippingMethod = async (id: string) => {
+        debugger
         try {
             const { setOrderShippingMethod } = await storefrontApiMutation(ctx)({
                 setOrderShippingMethod: [

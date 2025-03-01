@@ -31,7 +31,7 @@ const PageContent: React.FC<InferGetServerSidePropsType<typeof getServerSideProp
     ...props 
 }) => {
     const { addToCart, cart } = useCart(); // ✅ Get cart state
-    const { addToCheckout } = useCheckout();
+    const { addToCheckout, changeShippingMethod} = useCheckout();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [variantId, setVariantId] = useState<string | undefined>();
@@ -44,15 +44,16 @@ const PageContent: React.FC<InferGetServerSidePropsType<typeof getServerSideProp
 
     useEffect(() => {
         const addVariantAndProceed = async () => {
-            debugger;
+            // debugger;
             if (variantId) {
                 console.log('Adding variant to cart:', variantId);
                 // await addToCart(variantId, 1, true);
                 await addToCheckout(variantId, 1);
+                await changeShippingMethod("1");
             }
-            setTimeout(() => {
+            // setTimeout(() => {
                 setLoading(true); // ✅ Ensure loading is false only after addToCart completes       
-            }, 1000);
+            // }, 1000);
             
         };
 

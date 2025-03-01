@@ -45,7 +45,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
         // if (!checkout || checkout.lines.length === 0) {
         //     return homePageRedirect;
         // }
-
+        console.log("checkout->getServerSideProps",eligibleShippingMethods);
         const returnedStuff = {
             ...r.props,
             ...r.context,

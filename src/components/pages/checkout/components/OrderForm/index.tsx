@@ -67,10 +67,11 @@ type StandardMethodMetadata = {
     shouldErrorOnSettle: boolean;
 };
 
-export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods }) => {
+export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer }) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
-    console.log('OrderForm->shippingMethods',shippingMethods);
+    let shippingMethods = [ {...activeOrder?.shippingLines[0]?.shippingMethod, price: 500}];
+
 
     const { t } = useTranslation('checkout');
     const { t: tErrors } = useTranslation('common');
