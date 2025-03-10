@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { TH2, TP } from '@/src/components/atoms/TypoGraphy';
 import { Stack } from '@/src/components/atoms/Stack';
@@ -214,7 +214,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             const { nextOrderStates } = await storefrontApiQuery(ctx)({ nextOrderStates: true });
             if (!nextOrderStates.includes('ArrangingPayment')) {
                 setError('root', { message: tErrors(`errors.backend.UNKNOWN_ERROR`) });
-                return;
+                // return;
             }
             // Set the billing address for the order
             const { setOrderBillingAddress } = await storefrontApiMutation(ctx)({
@@ -372,6 +372,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
         }
     };
 
+    async function changeShip(id){
+        debugger;
+        await changeShippingMethod(id);
+        setValue('deliveryMethod', id);
+        clearErrors('deliveryMethod');
+    }
+
+    useEffect(()=>{
+        changeShip("1");
+
+    },[])
+
     return activeOrder?.totalQuantity === 0 ? (
         <Stack w100 column>
             <Stack column gap="2rem">
@@ -393,9 +405,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                             shippingMethods ? (
                                 <DeliveryMethodWrapper>
                                     <DeliveryMethod
-                                        selected={watch('deliveryMethod')}
+                                        // selected={watch('deliveryMethod')}
+                                        selected={"1"}
                                         error={errors.deliveryMethod?.message}
                                         onChange={async id => {
+                                            debugger;
                                             await changeShippingMethod(id);
                                             setValue('deliveryMethod', id);
                                             clearErrors('deliveryMethod');

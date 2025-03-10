@@ -30,7 +30,8 @@ export const DeliveryMethod: React.FC<Props> = ({
                         itemsCenter
                         w100
                         error={!!error}
-                        selected={selected === id}
+                        selected={true}
+                        // selected={selected === id}
                         key={id}
                         column
                         onClick={() => onChange(id)}>
