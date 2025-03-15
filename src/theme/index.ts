@@ -143,6 +143,10 @@ export const LightTheme = createTheme(300, t => ({
         back: '#141C23',
         front: t.gray(0),
         icon: { front: t.gray(900) },
+        hover: {
+            back: 'linear-gradient(90deg, #42a5f5, #ab47bc, #66bb6a, #ff7043)', // More vibrant and colorful gradient
+            front: t.gray(0), // Text color when hovering
+        },
     },
     shadow: `#69737c30`,
     error: '#eb1b19',

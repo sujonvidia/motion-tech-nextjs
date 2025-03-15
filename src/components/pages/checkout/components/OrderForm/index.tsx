@@ -423,12 +423,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                         footer={
                             <Stack column gap="2.5rem" justifyCenter itemsCenter>
                                 {/* <OrderPayment availablePaymentMethods={eligiblePaymentMethods} stripeData={{ paymentIntent: null }} /> */}
-                                <StyledButton loading={isSubmitting} type="submit">
+                                <BuyNowButton loading={isSubmitting} type="submit">
                                     <TP color="contrast" upperCase>
                                         {t('orderForm.continueToPayment')}
                                     </TP>
-                                </StyledButton>
-                                <LinkButton href="/">{t('orderForm.continueShopping')}</LinkButton>
+                                </BuyNowButton>
+                                <ShopNowButton href="/">{t('orderForm.continueShopping')}</ShopNowButton>
                             </Stack>
                         }
                     />
@@ -776,6 +776,59 @@ const LinkButton = styled(Link)`
 const StyledButton = styled(Button)`
     width: 100%;
 `;
+
+const ShopNowButton = styled(Link)`
+    display: block;
+    width: 100%;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(45deg, #00B5D6, #00D1B2, #FF8C42, #FFCD42);
+    background-size: 300% 300%;
+    color: white;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    font-weight: 600;
+    transition: background-position 0.5s, transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2), inset 0 -4px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background-position: 100% 0;
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25), inset 0 -4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+        transform: translateY(2px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+    }
+`;
+
+const BuyNowButton = styled(Button)`
+    width: 100%;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(45deg, #00D1B2, #00B5D6, #FF8C42, #FFCD42);
+    background-size: 300% 300%;
+    color: white;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    font-weight: 600;
+    transition: background-position 0.5s, transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2), inset 0 -4px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background-position: 100% 0;
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25), inset 0 -4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+        transform: translateY(2px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+    }
+`;
+
+
+
+
+
 
 const BackButton = styled(Link)`
     background-color: transparent;
