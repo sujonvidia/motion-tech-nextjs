@@ -138,6 +138,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
     // Copy standardMethod from OrderPayment.tsx to OrderForm.tsx
     const standardMethod = async (method: string, metadata: StandardMethodMetadata) => {
         try {
+            debugger;
             // setError(null);
             const { addPaymentToOrder } = await storefrontApiMutation(ctx)({
                 addPaymentToOrder: [
@@ -179,7 +180,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                 ],
             });
 
-            debugger;
+            
             console.log('addPaymentToOrder',addPaymentToOrder);
 
             // if (addPaymentToOrder.__typename !== 'Order') {
@@ -284,7 +285,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                         {
                             __typename: true,
                             '...on Order': { id: true },
-                            '...on AlreadyLoggedInError': { message: true, errorCode: true },
+                            // '...on AlreadyLoggedInError': { message: true, errorCode: true },
                             '...on EmailAddressConflictError': { message: true, errorCode: true },
                             '...on GuestCheckoutError': { message: true, errorCode: true },
                             '...on NoActiveOrderError': { message: true, errorCode: true },
@@ -372,6 +373,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
         }
     };
 
+    
+    
+    
     async function changeShip(id){
         debugger;
         await changeShippingMethod(id);
@@ -410,7 +414,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
                                         error={errors.deliveryMethod?.message}
                                         onChange={async id => {
                                             debugger;
-                                            await changeShippingMethod(id);
+                                            // await changeShippingMethod(id);
                                             setValue('deliveryMethod', id);
                                             clearErrors('deliveryMethod');
                                         }}
@@ -824,11 +828,6 @@ const BuyNowButton = styled(Button)`
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), inset 0 -2px 3px rgba(0, 0, 0, 0.1);
     }
 `;
-
-
-
-
-
 
 const BackButton = styled(Link)`
     background-color: transparent;

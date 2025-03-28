@@ -746,7 +746,7 @@ export const ReturnTypes: Record<string,any> = {
 		"...on IneligiblePaymentMethodError": "IneligiblePaymentMethodError",
 		"...on PaymentFailedError": "PaymentFailedError",
 		"...on PaymentDeclinedError": "PaymentDeclinedError",
-		"...on AlreadyLoggedInError": "AlreadyLoggedInError",
+		// "...on AlreadyLoggedInError": "AlreadyLoggedInError",
 		"...on MissingPasswordError": "MissingPasswordError",
 		"...on PasswordValidationError": "PasswordValidationError",
 		"...on PasswordAlreadySetError": "PasswordAlreadySetError",
@@ -1630,10 +1630,10 @@ export const ReturnTypes: Record<string,any> = {
 		message:"String",
 		paymentErrorMessage:"String"
 	},
-	AlreadyLoggedInError:{
-		errorCode:"ErrorCode",
-		message:"String"
-	},
+	// AlreadyLoggedInError:{
+	// 	errorCode:"ErrorCode",
+	// 	message:"String"
+	// },
 	MissingPasswordError:{
 		errorCode:"ErrorCode",
 		message:"String"
@@ -1690,7 +1690,7 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	SetCustomerForOrderResult:{
 		"...on Order":"Order",
-		"...on AlreadyLoggedInError":"AlreadyLoggedInError",
+		// "...on AlreadyLoggedInError":"AlreadyLoggedInError",
 		"...on EmailAddressConflictError":"EmailAddressConflictError",
 		"...on NoActiveOrderError":"NoActiveOrderError",
 		"...on GuestCheckoutError":"GuestCheckoutError"

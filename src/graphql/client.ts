@@ -107,6 +107,7 @@ export const SSGQuery = (params: { locale: string; channel: string }) => {
 };
 
 export const SSRQuery = (context: GetServerSidePropsContext) => {
+    console.log("SSRQuery",context.req.cookies);
     const authCookies = {
         session: context.req.cookies['session'],
         'session.sig': context.req.cookies['session.sig'],
@@ -119,7 +120,7 @@ export const SSRQuery = (context: GetServerSidePropsContext) => {
     const HOST = `${VENDURE_HOST}?languageCode=${locale}`;
     return VendureChain(HOST, {
         headers: {
-            Cookie: `session=${authCookies['session']}; session.sig=${authCookies['session.sig']}`,
+            // Cookie: `session=${authCookies['session']}; session.sig=${authCookies['session.sig']}`,
             'Content-Type': 'application/json',
             'vendure-token': properChannel,
         },

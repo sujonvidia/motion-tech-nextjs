@@ -32,6 +32,7 @@ const useCartContainer = createContainer(() => {
         //     return c && { ...c, totalQuantity: c.totalQuantity + 1 };
         // });
         try {
+            console.log("useCartContainer",activeOrder);
             const { addItemToOrder } = await storefrontApiMutation(ctx)({
                 addItemToOrder: [
                     { productVariantId: id, quantity: q },
@@ -65,6 +66,8 @@ const useCartContainer = createContainer(() => {
             console.log(e);
         }
     };
+
+    
     const removeFromCart = async (id: string) => {
         setActiveOrder(c => {
             return c && { ...c, lines: c.lines.filter(l => l.id !== id) };

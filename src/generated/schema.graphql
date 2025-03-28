@@ -37,10 +37,10 @@ enum AdjustmentType {
 """
 Returned when attempting to set the Customer for an Order when already logged in.
 """
-type AlreadyLoggedInError implements ErrorResult {
-  errorCode: ErrorCode!
-  message: String!
-}
+# type AlreadyLoggedInError implements ErrorResult {
+#   errorCode: ErrorCode!
+#   message: String!
+# }
 
 union ApplyCouponCodeResult = CouponCodeExpiredError | CouponCodeInvalidError | CouponCodeLimitError | Order
 
@@ -3394,7 +3394,7 @@ type Seller implements Node {
   updatedAt: DateTime!
 }
 
-union SetCustomerForOrderResult = AlreadyLoggedInError | EmailAddressConflictError | GuestCheckoutError | NoActiveOrderError | Order
+union SetCustomerForOrderResult = EmailAddressConflictError | GuestCheckoutError | NoActiveOrderError | Order
 
 union SetOrderShippingMethodResult = IneligibleShippingMethodError | NoActiveOrderError | Order | OrderModificationError
 

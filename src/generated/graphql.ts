@@ -61,11 +61,11 @@ export enum AdjustmentType {
 }
 
 /** Returned when attempting to set the Customer for an Order when already logged in. */
-export type AlreadyLoggedInError = ErrorResult & {
-  __typename?: 'AlreadyLoggedInError';
-  errorCode: ErrorCode;
-  message: Scalars['String']['output'];
-};
+// export type AlreadyLoggedInError = ErrorResult & {
+//   __typename?: 'AlreadyLoggedInError';
+//   errorCode: ErrorCode;
+//   message: Scalars['String']['output'];
+// };
 
 export type ApplyCouponCodeResult = CouponCodeExpiredError | CouponCodeInvalidError | CouponCodeLimitError | Order;
 
@@ -904,7 +904,7 @@ export type EmailAddressConflictError = ErrorResult & {
 };
 
 export enum ErrorCode {
-  AlreadyLoggedInError = 'ALREADY_LOGGED_IN_ERROR',
+  // AlreadyLoggedInError = 'ALREADY_LOGGED_IN_ERROR',
   CouponCodeExpiredError = 'COUPON_CODE_EXPIRED_ERROR',
   CouponCodeInvalidError = 'COUPON_CODE_INVALID_ERROR',
   CouponCodeLimitError = 'COUPON_CODE_LIMIT_ERROR',
@@ -3131,7 +3131,7 @@ export type Seller = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type SetCustomerForOrderResult = AlreadyLoggedInError | EmailAddressConflictError | GuestCheckoutError | NoActiveOrderError | Order;
+export type SetCustomerForOrderResult = EmailAddressConflictError | GuestCheckoutError | NoActiveOrderError | Order;
 
 export type SetOrderShippingMethodResult = IneligibleShippingMethodError | NoActiveOrderError | Order | OrderModificationError;
 

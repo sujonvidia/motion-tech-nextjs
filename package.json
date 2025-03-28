@@ -26,6 +26,7 @@
         "@graphql-typed-document-node/core": "^3.2.0",
         "@hookform/resolvers": "^3.3.2",
         "@next/font": "^14.0.3",
+        "@plasmicapp/loader-nextjs": "^1.0.419",
         "@stripe/react-stripe-js": "^2.4.0",
         "@stripe/stripe-js": "^2.2.0",
         "@tinymce/tinymce-react": "^5.1.1",
