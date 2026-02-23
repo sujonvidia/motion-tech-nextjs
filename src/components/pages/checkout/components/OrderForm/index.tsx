@@ -61,11 +61,7 @@ const isAddressesEqual = (a: object, b?: object) => {
     }
 };
 
-type StandardMethodMetadata = {
-    shouldDecline: boolean;
-    shouldError: boolean;
-    shouldErrorOnSettle: boolean;
-};
+type StandardMethodMetadata = Record<string, unknown>;
 
 export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer }) => {
     const ctx = useChannels();
@@ -183,11 +179,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             
             console.log('addPaymentToOrder',addPaymentToOrder);
 
-            // if (addPaymentToOrder.__typename !== 'Order') {
-            //     // setError(tError(`errors.backend.${addPaymentToOrder.errorCode}`));
-            // // } else if (POSITIVE_DEFAULT_PAYMENT_STATUSES.includes(addPaymentToOrder.state)) {
+            if (addPaymentToOrder.__typename === 'Order') {
                 push(`/checkout/confirmation/${addPaymentToOrder.code}`);
-            // }
+            } else {
+                setError('root', { message: tErrors(`errors.backend.${addPaymentToOrder.errorCode}`) });
+            }
         } catch (e) {
             console.log(e);
             // setError(tError(`errors.backend.UNKNOWN_ERROR`));
@@ -883,3 +879,4 @@ const ShippingWrapper = styled(motion.div)`
 const Form = styled.form`
     margin-top: 1.6rem;
 `;
+
