@@ -22,7 +22,13 @@ import { useChannels } from '@/src/state/channels';
 import { ProductVariantTileType, productVariantTileSelector } from '@/src/graphql/selectors';
 // import { Editor } from '@tinymce/tinymce-react';
 
-const Editor = dynamic(() => Promise.resolve(require('@tinymce/tinymce-react').Editor), { ssr: false });
+const Editor = dynamic<any>(
+    () =>
+        import('@tinymce/tinymce-react').then(
+            mod => mod.Editor as unknown as React.ComponentType<any>,
+        ),
+    { ssr: false },
+);
 
 
 // Dynamically import the TinyMCE Editor component with proper typing
