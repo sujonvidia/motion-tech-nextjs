@@ -3,7 +3,6 @@ import { ActiveOrderSelector, ActiveOrderType } from '@/src/graphql/selectors';
 import { useState } from 'react';
 import { createContainer } from 'unstated-next';
 import { CheckoutContainerType } from './types';
-import { emptyCheckoutState } from './utils';
 import { useChannels } from '../channels';
 
 //This is the Checkout Store
@@ -11,11 +10,9 @@ import { useChannels } from '../channels';
 //It looks same as the Cart Store, but it accept an initial state and it has some extra methods
 //Prepared for future use *in feature checkout can be different than cart
 //Additional useCart is on client side, because it is used in many places
-const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: ActiveOrderType }>(initialState => {
-    // if (!initialState?.checkout) return emptyCheckoutState;
+const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout?: ActiveOrderType }>(initialState => {
     const ctx = useChannels();
-    const [activeOrder, setActiveOrder] = useState<ActiveOrderType>(initialState.checkout);
-    console.log('checkout->activeOrder:',activeOrder)
+    const [activeOrder, setActiveOrder] = useState<ActiveOrderType | undefined>(initialState?.checkout);
 
     const addToCheckout = async (id: string, q: number) => {
        
@@ -46,9 +43,7 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
                 ],
             });
             if (addItemToOrder.__typename === 'Order') {
-                debugger;
                 setActiveOrder(addItemToOrder);
-                console.log('checkout->addToCheckout',id, addItemToOrder);
                 return;
             }
         } catch {
@@ -117,7 +112,6 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
     };
 
     const changeShippingMethod = async (id: string) => {
-        debugger
         try {
             const { setOrderShippingMethod } = await storefrontApiMutation(ctx)({
                 setOrderShippingMethod: [
