@@ -66,7 +66,15 @@ type StandardMethodMetadata = Record<string, unknown>;
 export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer }) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
-    let shippingMethods = [ {...activeOrder?.shippingLines[0]?.shippingMethod, price: 500}];
+    const shippingMethod = activeOrder?.shippingLines?.[0]?.shippingMethod;
+    const shippingMethods = [
+        {
+            id: shippingMethod?.id ?? '1',
+            name: shippingMethod?.name ?? 'Standard Shipping',
+            description: shippingMethod?.description ?? '',
+            price: 500,
+        },
+    ];
 
 
     const { t } = useTranslation('checkout');
