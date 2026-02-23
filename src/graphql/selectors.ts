@@ -160,9 +160,7 @@ export const ProductDetailSelector = Selector('Product')({
     name: true,
     description: true,
     id: true,
-    customFields: {
-        landing: true
-    },
+    customFields: true,
     slug: true,
     optionGroups: {
         name: true,
