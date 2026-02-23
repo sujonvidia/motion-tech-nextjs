@@ -35,6 +35,18 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
     const { t: breadcrumb } = useTranslation('common');
     const ctx = useChannels();
     const { product, variant, addingError, productOptionsGroups, handleOptionClick, handleBuyNow, handleAddToCart } = useProduct();
+    const landingContent = (() => {
+        const cf = product?.customFields;
+        if (!cf) return undefined;
+        if (typeof cf === 'string') {
+            try {
+                return (JSON.parse(cf) as { landing?: string })?.landing;
+            } catch {
+                return undefined;
+            }
+        }
+        return (cf as { landing?: string })?.landing;
+    })();
 
     console.log('ProductPage', product);
     const breadcrumbs = [
@@ -212,11 +224,11 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                         title: t('description'),
                                         children: (
                                             <TP color="subtitle" style={{ marginTop: '1.5rem' }}>
-                                                {product?.customFields?.landing ? (
+                                                {landingContent ? (
                                                     <div suppressHydrationWarning>
                                                         <Editor
                                                             apiKey="d1hzqw9ym2dak60p72jjeq0iqypm8vtd44xtzwhv05kkp9r7" // Replace with your TinyMCE API key
-                                                            initialValue={product?.customFields?.landing} // Use landing content directly
+                                                            initialValue={landingContent} // Use landing content directly
                                                             init={{
                                                                 height: 500,
                                                                 menubar: false, // Hide menubar
