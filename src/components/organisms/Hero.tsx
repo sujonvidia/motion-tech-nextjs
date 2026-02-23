@@ -38,8 +38,8 @@ export const Hero: React.FC<{
                         size: { width: 700, height: 500, format: 'webp', mode: 'resize' },
                         src: image,
                     })}
-                    alt="Aexol shop demo"
-                    title="Aexol shop demo"
+                    alt="Motion Marts shop"
+                    title="Motion Marts shop"
                 />
             </Content>
         </Main>

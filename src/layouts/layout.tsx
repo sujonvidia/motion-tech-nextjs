@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { CustomHelmet } from '@/src/components';
 import { Navigation } from '@/src/layouts/Navigation';
 import { CollectionTileType, NavigationType } from '@/src/graphql/selectors';
-import { Footer } from '@/src/layouts/Footer';
 import { Stack } from '@/src/components/atoms/Stack';
 import { useProduct } from '@/src/state/product';
 import { useCollection } from '@/src/state/collection';
@@ -12,7 +11,7 @@ import { RootNode } from '@/src/util/arrayToTree';
 import { useChannels } from '@/src/state/channels';
 import { channels } from '@/src/lib/consts';
 
-export const siteTitle = 'Aexol Next.js Storefront';
+export const siteTitle = 'Motion Marts';
 
 interface LayoutProps {
     pageTitle?: string;
@@ -79,7 +78,6 @@ export const Layout: React.FC<LayoutProps> = ({ pageTitle, children, categories,
             <Stack w100 itemsCenter column>
                 {children}
             </Stack>
-            <Footer navigation={navigation} />
         </MainStack>
     );
 };
