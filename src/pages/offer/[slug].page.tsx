@@ -11,33 +11,43 @@ import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
 
 const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps>) => {
-    const { t } = useTranslation('checkout'); // ✅ Ensures translations are loaded
+    const { t } = useTranslation('checkout');
     const { product } = props;
     const { addToCart, fetchActiveOrder } = useCart();
     const [loading, setLoading] = useState(true);
-    const [hasAddedToCart, setHasAddedToCart] = useState(false); // ✅ Prevent infinite loop
+    const [hasAddedToCart, setHasAddedToCart] = useState(false);
+
+    const landingContent = (() => {
+        const cf = product?.customFields;
+        if (!cf) return '';
+        if (typeof cf === 'string') {
+            try {
+                return (JSON.parse(cf) as { landing?: string })?.landing ?? '';
+            } catch {
+                return '';
+            }
+        }
+        return (cf as { landing?: string })?.landing ?? '';
+    })();
 
     useEffect(() => {
         const fetchOrderData = async () => {
             const order = await fetchActiveOrder();
-
-            // ✅ Check if the product is already in the order
             const isProductInOrder = order?.lines?.some(line => line.productVariant.id === product?.variants[0]?.id);
 
             if (!isProductInOrder && product?.variants.length > 0 && !hasAddedToCart) {
                 const productVariantId = product.variants[0].id;
-
                 setHasAddedToCart(true);
-                addToCart(productVariantId, 1).then(fetchOrderData); // ✅ Add product & refresh order
+                addToCart(productVariantId, 1).then(fetchOrderData);
             } else {
                 setLoading(false);
             }
         };
 
         fetchOrderData();
-    }, [product]); // ✅ Prevents infinite loops
+    }, [product]);
 
-    if (!product?.customFields?.landing) {
+    if (!landingContent) {
         return (
             <Wrapper>
                 <p>{t('landingPage.notAvailable', 'Landing content is not available for this product.')}</p>
@@ -49,18 +59,16 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
         <CheckoutProvider>
             <Wrapper>
                 <ContentContainer>
-                    {/* ✅ Render the landing content safely */}
-                    <StyledLandingContent dangerouslySetInnerHTML={{ __html: product.customFields.landing || '' }} />
-
-                    {/* ✅ Product Details */}
+                    <StyledLandingContent dangerouslySetInnerHTML={{ __html: landingContent }} />
                     <AdditionalDetails>
                         <h2>{product.name}</h2>
                         {product.variants.length > 0 && (
-                            <p>{t('price', 'Price')}: {product.variants[0].priceWithTax} {product.variants[0].currencyCode}</p>
+                            <p>
+                                {t('price', 'Price')}: {product.variants[0].priceWithTax}{' '}
+                                {product.variants[0].currencyCode}
+                            </p>
                         )}
                     </AdditionalDetails>
-
-                    {/* ✅ Ensure Order Summary updates dynamically */}
                     <CheckoutContent loading={loading} />
                 </ContentContainer>
             </Wrapper>
@@ -68,10 +76,9 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
     );
 };
 
-// ✅ Separate component to avoid "useCheckout()" outside provider
 const CheckoutContent = ({ loading }: { loading: boolean }) => {
-    const { activeOrder } = useCheckout(); // ✅ Now correctly inside CheckoutProvider
-    const { t } = useTranslation('checkout'); // ✅ Ensure translations are available
+    const { activeOrder } = useCheckout();
+    const { t } = useTranslation('checkout');
 
     return loading ? (
         <p>{t('orderSummary.loading', 'Loading Order Summary...')}</p>
@@ -84,7 +91,7 @@ const CheckoutContent = ({ loading }: { loading: boolean }) => {
 
 export default LandingPage;
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getStaticProps: GetStaticProps = async context => {
     const { params, locale } = context;
 
     if (!params?.slug || (Array.isArray(params.slug) && params.slug.length === 0)) {
@@ -101,14 +108,13 @@ export const getStaticProps: GetStaticProps = async (context) => {
     return {
         props: {
             ...productProps.props,
-            ...(await serverSideTranslations(locale ?? 'en', ['checkout'])), // ✅ Loads translations
+            ...(await serverSideTranslations(locale ?? 'en', ['checkout'])),
         },
     };
 };
 
 export { getStaticPaths };
 
-// ✅ Styled components
 const Wrapper = styled.div`
     margin: 0 auto;
     padding: 2rem;
