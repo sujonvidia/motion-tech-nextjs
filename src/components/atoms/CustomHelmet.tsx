@@ -24,7 +24,7 @@ export const CustomHelmet: React.FC<{
     const u = new URL((process.env.NEXT_PUBLIC_DOMAIN || 'https://shop.aexol.com') + asPath);
     const canonicalUrl = u.origin + u.pathname;
 
-    let metaDescription = product?.description || collection?.description || 'Demo store made by Aexol';
+    let metaDescription = product?.description || collection?.description || 'Motion Marts online store';
     if (metaDescription.length > 160) {
         metaDescription = metaDescription.slice(0, 160 - 3) + '...';
         // console.log(`description of ${asPath} is too long`);
@@ -35,7 +35,7 @@ export const CustomHelmet: React.FC<{
         description: metaDescription,
         pageUrl: `${asPath}`,
         keywords: [
-            'Aexol',
+            'Motion Marts',
             'Shop',
             'E-commerce',
             'React',
@@ -135,12 +135,12 @@ const doStoreLD = () => {
     return {
         '@context': 'https://schema.org/',
         '@type': 'OnlineStore',
-        name: 'Aexol demo shop',
-        description: 'Aexol demo shop is for demonstration purposes, change des to fit your usecase',
-        image: '/images/aexol_full_logo.png',
+        name: 'Motion Marts',
+        description: 'Motion Marts online store',
+        image: '/images/aexol_full_logo.png?v=20260223',
         parentOrganization: {
             '@type': 'OnlineBusiness',
-            name: 'Aexol',
+            name: 'Motion Marts',
             url: 'http://aexol.com/',
         },
     };

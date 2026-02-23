@@ -16,14 +16,12 @@ import { RootNode } from '@/src/util/arrayToTree';
 import { DesktopNavigation } from '@/src/components/organisms/DesktopNavigation';
 import { SearchIcon } from 'lucide-react';
 import { IconButton } from '@/src/components/molecules/Button';
-import { AnnouncementBar } from '@/src/components/organisms/AnnouncementBar';
 import { CategoryBar } from './CategoryBar';
 import { NavigationSearch } from '@/src/components/organisms/NavgationSearch';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigationSearch } from '@/src/components/organisms/NavgationSearch/hooks';
 import { useEffect, useRef } from 'react';
 import { Picker } from '@/src/components/organisms/Picker';
-import { useTranslation } from 'next-i18next';
 
 interface NavigationProps {
     navigation: RootNode<NavigationType> | null;
@@ -37,7 +35,6 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = ({ navigation, categories, changeModal }) => {
-    const { t } = useTranslation('common');
     const { isLogged, cart } = useCart();
     const navigationSearch = useNavigationSearch();
     const searchRef = useRef<HTMLDivElement>(null);
@@ -64,17 +61,8 @@ export const Navigation: React.FC<NavigationProps> = ({ navigation, categories, 
         };
     }, []);
 
-    // THIS SHOULD COME FROM PLUGIN
-    const entries = [
-        { text: t('announcements-bar')[0], href: '/collections/all' },
-        { text: t('announcements-bar')[1], href: '/' },
-        { text: t('announcements-bar')[2], href: '/' },
-        { text: t('announcements-bar')[3], href: '/' },
-    ];
-
     return (
         <>
-            <AnnouncementBar entries={entries} secondsBetween={5} />
             <StickyContainer>
                 <ContentContainer>
                     <Stack itemsCenter justifyBetween gap="5rem" w100>
