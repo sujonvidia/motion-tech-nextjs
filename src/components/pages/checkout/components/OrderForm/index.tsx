@@ -372,7 +372,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
     
     
     
-    async function changeShip(id){
+    async function changeShip(id: string){
         debugger;
         await changeShippingMethod(id);
         setValue('deliveryMethod', id);
