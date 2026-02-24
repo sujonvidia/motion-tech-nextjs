@@ -3,7 +3,7 @@ import type { InferGetStaticPropsType, GetStaticProps } from 'next';
 import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
 import { getStaticPaths } from '@/src/components/pages/products/paths';
 import { CheckoutPage } from '@/src/components/pages/checkout';
-import { useCheckout } from '@/src/state/checkout';
+import { CheckoutProvider, useCheckout } from '@/src/state/checkout';
 import { useCart } from '@/src/state/cart';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
@@ -13,7 +13,7 @@ import { ContentContainer } from '@/src/components/atoms';
 const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps>) => {
     const { t } = useTranslation('checkout');
     const { product } = props;
-    const { addToCart, fetchActiveOrder } = useCart();
+    const { addToCart, fetchActiveOrder, activeOrder: cartActiveOrder } = useCart();
     const [loading, setLoading] = useState(true);
     const [hasAddedToCart, setHasAddedToCart] = useState(false);
 
@@ -56,21 +56,25 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
     }
 
     return (
-        <Wrapper>
-            <ContentContainer>
-                <StyledLandingContent dangerouslySetInnerHTML={{ __html: landingContent }} />
-                <AdditionalDetails>
-                    <h2>{product.name}</h2>
-                    {product.variants.length > 0 && (
-                        <p>
-                            {t('price', 'Price')}: {product.variants[0].priceWithTax}{' '}
-                            {product.variants[0].currencyCode}
-                        </p>
-                    )}
-                </AdditionalDetails>
-                <CheckoutContent loading={loading} />
-            </ContentContainer>
-        </Wrapper>
+        <CheckoutProvider
+            key={`${cartActiveOrder?.id ?? 'empty'}-${cartActiveOrder?.totalQuantity ?? 0}`}
+            initialState={{ checkout: cartActiveOrder }}>
+            <Wrapper>
+                <ContentContainer>
+                    <StyledLandingContent dangerouslySetInnerHTML={{ __html: landingContent }} />
+                    <AdditionalDetails>
+                        <h2>{product.name}</h2>
+                        {product.variants.length > 0 && (
+                            <p>
+                                {t('price', 'Price')}: {product.variants[0].priceWithTax}{' '}
+                                {product.variants[0].currencyCode}
+                            </p>
+                        )}
+                    </AdditionalDetails>
+                    <CheckoutContent loading={loading} />
+                </ContentContainer>
+            </Wrapper>
+        </CheckoutProvider>
     );
 };
 
