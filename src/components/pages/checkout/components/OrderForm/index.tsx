@@ -49,6 +49,8 @@ interface OrderFormProps {
     availableCountries?: AvailableCountriesType[];
     activeCustomer: ActiveCustomerType | null;
     shippingMethods: ShippingMethodType[] | null;
+    paymentMethod?: string;
+    autoPlaceOrder?: boolean;
 }
 
 const isAddressesEqual = (a: object, b?: object) => {
@@ -59,7 +61,13 @@ const isAddressesEqual = (a: object, b?: object) => {
     }
 };
 
-export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, activeCustomer, shippingMethods }) => {
+export const OrderForm: React.FC<OrderFormProps> = ({
+    availableCountries,
+    activeCustomer,
+    shippingMethods,
+    paymentMethod,
+    autoPlaceOrder,
+}) => {
     const ctx = useChannels();
     const { activeOrder, changeShippingMethod } = useCheckout();
     // console.log('checkout:activeOrder',activeOrder);
@@ -67,7 +75,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
     const { t } = useTranslation('checkout');
     const { t: tErrors } = useTranslation('common');
     const push = usePush();
-    const schema = useValidationSchema();
+    const schema = useValidationSchema({ requireEmail: !autoPlaceOrder });
 
     const errorRef = React.useRef<HTMLDivElement>(null);
 
@@ -95,7 +103,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             shippingDifferentThanBilling: defaultShippingAddress
                 ? !isAddressesEqual(defaultShippingAddress, defaultBillingAddress)
                 : false,
-            billing: { countryCode },
+            billing: {
+                fullName: 'Customer',
+                city: 'Dhaka',
+                province: 'BD',
+                postalCode: '0000',
+                countryCode,
+            },
+            terms: true,
             // NIP: defaultBillingAddress?.customFields?.NIP ?? '',
             // userNeedInvoice: defaultBillingAddress?.customFields?.NIP ? true : false,
         },
@@ -125,6 +140,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             : undefined,
         resolver: zodResolver(schema),
     });
+
+    React.useEffect(() => {
+        const defaultShippingMethod = shippingMethods?.find(method => method.name === 'Express Shipping') ?? shippingMethods?.[0];
+        if (defaultShippingMethod && !watch('deliveryMethod')) {
+            setValue('deliveryMethod', defaultShippingMethod.id, { shouldValidate: true });
+            if (activeOrder?.shippingLines[0]?.shippingMethod.id !== defaultShippingMethod.id) {
+                void changeShippingMethod(defaultShippingMethod.id);
+            }
+        }
+    }, [activeOrder?.shippingLines, changeShippingMethod, setValue, shippingMethods, watch]);
 
     const onSubmit: SubmitHandler<FormValues> = async ({
         emailAddress,
@@ -210,9 +235,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
             }
 
             if (!activeCustomer) {
+                const customerEmail = emailAddress || `${phoneNumber || 'guest'}@order.local`;
                 const { setCustomerForOrder } = await storefrontApiMutation(ctx)({
                     setCustomerForOrder: [
-                        { input: { emailAddress, firstName, lastName, phoneNumber } },
+                        { input: { emailAddress: customerEmail, firstName, lastName, phoneNumber } },
                         {
                             __typename: true,
                             '...on Order': { id: true },
@@ -291,6 +317,63 @@ export const OrderForm: React.FC<OrderFormProps> = ({ availableCountries, active
 
             if (transitionOrderToState?.__typename !== 'Order') {
                 setError('root', { message: tErrors(`errors.backend.${transitionOrderToState.errorCode}`) });
+                return;
+            }
+
+            if (autoPlaceOrder && paymentMethod) {
+                const { addPaymentToOrder } = await storefrontApiMutation(ctx)({
+                    addPaymentToOrder: [
+                        {
+                            input: {
+                                method: paymentMethod,
+                                metadata: {
+                                    shouldDecline: false,
+                                    shouldError: false,
+                                    shouldErrorOnSettle: false,
+                                },
+                            },
+                        },
+                        {
+                            __typename: true,
+                            '...on Order': ActiveOrderSelector,
+                            '...on IneligiblePaymentMethodError': {
+                                message: true,
+                                errorCode: true,
+                                eligibilityCheckerMessage: true,
+                            },
+                            '...on NoActiveOrderError': { message: true, errorCode: true },
+                            '...on OrderPaymentStateError': { message: true, errorCode: true },
+                            '...on OrderStateTransitionError': {
+                                message: true,
+                                errorCode: true,
+                                fromState: true,
+                                toState: true,
+                                transitionError: true,
+                            },
+                            '...on PaymentDeclinedError': {
+                                errorCode: true,
+                                message: true,
+                                paymentErrorMessage: true,
+                            },
+                            '...on PaymentFailedError': {
+                                errorCode: true,
+                                message: true,
+                                paymentErrorMessage: true,
+                            },
+                        },
+                    ],
+                });
+
+                if (addPaymentToOrder.__typename === 'Order') {
+                    push(`/checkout/confirmation/${addPaymentToOrder.code}`);
+                    return;
+                }
+
+                setError('root', {
+                    message: tErrors(`errors.backend.${addPaymentToOrder.errorCode}`, {
+                        defaultValue: addPaymentToOrder.message,
+                    }),
+                });
                 return;
             }
             // Redirect to payment page

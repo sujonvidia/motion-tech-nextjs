@@ -26,7 +26,7 @@ const useCartContainer = createContainer(() => {
         }
     };
 
-    const addToCart = async (id: string, q: number, o?: boolean) => {
+    const addToCart = async (id: string, q: number, o?: boolean): Promise<ActiveOrderType | undefined> => {
         setActiveOrder(c => {
             return c && { ...c, totalQuantity: c.totalQuantity + 1 };
         });
@@ -59,6 +59,31 @@ const useCartContainer = createContainer(() => {
             if (addItemToOrder.__typename === 'Order') {
                 setActiveOrder(addItemToOrder);
                 if (o) open();
+                return addItemToOrder;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
+    const setItemQuantity = async (id: string, q: number) => {
+        try {
+            const { adjustOrderLine } = await storefrontApiMutation(ctx)({
+                adjustOrderLine: [
+                    { orderLineId: id, quantity: q },
+                    {
+                        __typename: true,
+                        '...on Order': ActiveOrderSelector,
+                        '...on OrderLimitError': { errorCode: true, message: true },
+                        '...on InsufficientStockError': { errorCode: true, message: true },
+                        '...on NegativeQuantityError': { errorCode: true, message: true },
+                        '...on OrderModificationError': { errorCode: true, message: true },
+                    },
+                ],
+            });
+            if (adjustOrderLine.__typename === 'Order') {
+                setActiveOrder(adjustOrderLine);
+                return adjustOrderLine;
             }
         } catch (e) {
             console.log(e);
@@ -178,6 +203,7 @@ const useCartContainer = createContainer(() => {
         activeOrder,
         cart: activeOrder,
         addToCart,
+        setItemQuantity,
         setItemQuantityInCart,
         removeFromCart,
         fetchActiveOrder,

@@ -1,11 +1,11 @@
 import { useTranslation } from 'next-i18next';
 import * as z from 'zod';
 
-export const useValidationSchema = () => {
+export const useValidationSchema = ({ requireEmail = true }: { requireEmail?: boolean } = {}) => {
     const { t } = useTranslation('checkout');
 
     const userObject = z.object({
-        emailAddress: z.string().email(),
+        emailAddress: requireEmail ? z.string().email() : z.string().email().optional().or(z.literal('')),
         firstName: z.string().min(1, { message: t('orderForm.errors.firstName.required') }),
         lastName: z.string().min(1, { message: t('orderForm.errors.lastName.required') }),
         phoneNumber: z

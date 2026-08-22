@@ -16,7 +16,7 @@ interface OrderSummaryProps {
 }
 
 export const OrderSummary: React.FC<PropsWithChildren<OrderSummaryProps>> = ({ footer, shipping }) => {
-    const { activeOrder, applyCouponCode, removeCouponCode } = useCheckout(); console.log('OrderSummary',activeOrder)
+    const { activeOrder, applyCouponCode, removeCouponCode } = useCheckout();
     const { t } = useTranslation('checkout');
     // const { asPath } = useRouter();
     // const step = asPath.includes('payment') ? 'payment' : 'shipping';

@@ -8,19 +8,36 @@ import { CheckoutCarousel } from './components/OrderSummary/CheckoutCarousel';
 import styled from '@emotion/styled';
 import { ContentContainer } from '@/src/components/atoms';
 
-export const CheckoutPage: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = props => {
+type CheckoutPageProps = Partial<InferGetServerSidePropsType<typeof getServerSideProps>> & {
+    autoPlaceOrder?: boolean;
+    paymentMethod?: string;
+    shippingMethods?: NonNullable<InferGetServerSidePropsType<typeof getServerSideProps>['eligibleShippingMethods']>;
+};
+
+export const CheckoutPage: React.FC<CheckoutPageProps> = props => {
     const { t } = useTranslation('checkout');
-    const { availableCountries, alsoBoughtProducts, eligibleShippingMethods, activeCustomer } = props;
+    const {
+        availableCountries,
+        alsoBoughtProducts,
+        eligibleShippingMethods,
+        eligiblePaymentMethods,
+        activeCustomer,
+        autoPlaceOrder,
+        paymentMethod,
+        shippingMethods,
+    } = props;
 
     return (
         <CheckoutLayout pageTitle={`${t('seoTitles.checkout')}`}>
             <Content>
                 <OrderForm
                     availableCountries={availableCountries}
-                    shippingMethods={eligibleShippingMethods}
-                    activeCustomer={activeCustomer}
+                    shippingMethods={shippingMethods ?? eligibleShippingMethods ?? null}
+                    activeCustomer={activeCustomer ?? null}
+                    paymentMethod={paymentMethod ?? eligiblePaymentMethods?.find(method => method.code === 'standard-payment')?.code}
+                    autoPlaceOrder={autoPlaceOrder}
                 />
-                <CheckoutCarousel alsoBoughtProducts={alsoBoughtProducts} />
+                    <CheckoutCarousel alsoBoughtProducts={alsoBoughtProducts ?? null} />
             </Content>
         </CheckoutLayout>
     );
