@@ -160,9 +160,7 @@ export const ProductDetailSelector = Selector('Product')({
     name: true,
     description: true,
     id: true,
-    customFields: {
-        landing: true
-    },
+    customFields: true,
     slug: true,
     optionGroups: {
         name: true,
@@ -201,7 +199,13 @@ export const ProductDetailSelector = Selector('Product')({
     facetValues: ProductDetailsFacetSelector,
 });
 
-export type ProductDetailType = FromSelector<typeof ProductDetailSelector, 'Product', typeof scalars>;
+type ProductDetailSelectorType = FromSelector<typeof ProductDetailSelector, 'Product', typeof scalars>;
+
+export type ProductDetailType = Omit<ProductDetailSelectorType, 'customFields'> & {
+    customFields?: {
+        landing?: string | null;
+    } | null;
+};
 
 export const NewestProductSelector = Selector('Product')({
     name: true,

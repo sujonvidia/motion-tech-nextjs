@@ -22,7 +22,7 @@ import { useChannels } from '@/src/state/channels';
 import { ProductVariantTileType, productVariantTileSelector } from '@/src/graphql/selectors';
 
 
-const Editor = dynamic(() => Promise.resolve(require('@tinymce/tinymce-react').Editor), { ssr: false });
+const Editor = dynamic<any>(() => import('@tinymce/tinymce-react').then(module => module.Editor as any), { ssr: false });
 
 
 export const OfferPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = props => {

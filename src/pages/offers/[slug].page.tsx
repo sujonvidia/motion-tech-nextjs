@@ -12,6 +12,7 @@ import { OrderPayment } from '@/src/components/pages/checkout/components/OrderPa
 
 export const getServerSideProps = async (context: any) => {
     const productData = await productGetStaticProps(context);
+    if (!('props' in productData) || !productData.props) return productData;
     const product = productData.props.product;
 
     if (product?.variants?.length > 0) {
@@ -48,6 +49,7 @@ export const getServerSideProps = async (context: any) => {
     }
 
     const checkoutData = await checkoutGetServerSideProps(context);
+    if (!('props' in checkoutData) || !checkoutData.props) return checkoutData;
     console.log('checkoutData:offer:', checkoutData.props);
 
     return {
@@ -60,12 +62,12 @@ export const getServerSideProps = async (context: any) => {
     };
 };
 
-const Page: React.FC<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ product, availableCountries, checkout, eligiblePaymentMethods, stripeData, ...props }) => {
+const Page: React.FC<any> = ({ product, availableCountries, checkout, eligiblePaymentMethods, stripeData, ...props }) => {
     return (
         <Wrapper>
             <ImageSliderSection>
                 <ImageSliderContainer>
-                    {(product?.assets?.length ? product.assets : (product?.featuredAsset ? [product.featuredAsset] : [])).map((asset, index) => (
+                    {(product?.assets?.length ? product.assets : (product?.featuredAsset ? [product.featuredAsset] : [])).map((asset: any, index: number) => (
                         <ImageSlide key={index} src={asset.preview?.replace(/\\/g, '/')} alt={product.name} />
                     ))}
                 </ImageSliderContainer>

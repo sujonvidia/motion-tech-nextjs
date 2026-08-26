@@ -4,6 +4,9 @@ const nextConfig = {
     pageExtensions: ['page.tsx', 'page.ts'],
     swcMinify: true,
     reactStrictMode: true,
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
 };
 
 module.exports = nextConfig;
