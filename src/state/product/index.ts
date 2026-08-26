@@ -89,8 +89,9 @@ const useProductContainer = createContainer<ProductContainerType, { product: Pro
 
     const handleBuyNow = async () => {
         if (variant?.id) {
-            await addToCart(variant.id, 1);
-            push('/checkout');
+            const order = await addToCart(variant.id, 1);
+            if (order) push('/checkout');
+            else setAddingError('Unable to add this product to your cart.');
         } else setAddingError(t('select-options'));
     };
 

@@ -24,6 +24,9 @@ import { ProductVariantTileType, productVariantTileSelector } from '@/src/graphq
 
 const Editor = dynamic<any>(() => import('@tinymce/tinymce-react').then(module => module.Editor as any), { ssr: false });
 
+const hasStock = (stockLevel?: string | number | null) =>
+    typeof stockLevel === 'number' ? stockLevel > 0 : stockLevel === 'IN_STOCK';
+
 
 // Dynamically import the TinyMCE Editor component with proper typing
 // const EditorNoSSR = dynamic(() => import('@tinymce/tinymce-react').then((mod) => mod.Editor), {
@@ -133,7 +136,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                 ) : null}
                             </Stack>
                             <Stack w100 gap="1rem" column>
-                                {variant && Number(variant.stockLevel) > 0 && Number(variant.stockLevel) <= 10 && (
+                                {variant && typeof variant.stockLevel === 'number' && variant.stockLevel > 0 && variant.stockLevel <= 10 && (
                                     <MakeItQuick size="1.5rem" weight={500}>
                                         <Trans
                                             i18nKey="stock-levels.low-stock"
@@ -145,7 +148,7 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                 )}
                                 <StockInfo
                                     comingSoon={!variant}
-                                    outOfStock={Number(variant?.stockLevel) <= 0}
+                                    outOfStock={!hasStock(variant?.stockLevel)}
                                     itemsCenter
                                     gap="0.25rem">
                                     {!variant ? null : Number(variant.stockLevel) > 0 ? (
@@ -156,13 +159,13 @@ export const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps
                                     <TP>
                                         {!variant
                                             ? null
-                                            : Number(variant.stockLevel) > 0
+                                            : hasStock(variant.stockLevel)
                                                 ? t('stock-levels.in-stock')
                                                 : t('stock-levels.out-of-stock')}
                                     </TP>
                                 </StockInfo>
                             </Stack>
-                            {!variant ? null : Number(variant.stockLevel) <= 0 ? (
+                            {!variant ? null : !hasStock(variant.stockLevel) ? (
                                 <NotifyMeForm />
                             ) : (
                                 <Stack w100 gap="2.5rem" justifyBetween column>
