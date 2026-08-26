@@ -108,6 +108,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		resetPassword:{
 
+		},
+		registerNewSeller:{
+			input:"RegisterSellerInput"
 		}
 	},
 	AssetType: "enum" as const,
@@ -277,6 +280,12 @@ export const AllTypesProps: Record<string,any> = {
 		filter:"ProductVariantFilterParameter",
 		filterOperator:"LogicalOperator"
 	},
+	CreateSellerInput:{
+		customFields:"JSON"
+	},
+	RegisterSellerInput:{
+		seller:"CreateSellerInput"
+	},
 	ProductVariantFilterParameter:{
 		id:"IDOperators",
 		productId:"IDOperators",
@@ -288,7 +297,9 @@ export const AllTypesProps: Record<string,any> = {
 		price:"NumberOperators",
 		currencyCode:"StringOperators",
 		priceWithTax:"NumberOperators",
-		stockLevel:"StringOperators"
+		stockLevel:"StringOperators",
+		_and:"ProductVariantFilterParameter",
+		_or:"ProductVariantFilterParameter"
 	},
 	ProductVariantSortParameter:{
 		id:"SortOrder",
@@ -309,7 +320,9 @@ export const AllTypesProps: Record<string,any> = {
 		firstName:"StringOperators",
 		lastName:"StringOperators",
 		phoneNumber:"StringOperators",
-		emailAddress:"StringOperators"
+		emailAddress:"StringOperators",
+		_and:"CustomerFilterParameter",
+		_or:"CustomerFilterParameter"
 	},
 	CustomerSortParameter:{
 		id:"SortOrder",
@@ -337,7 +350,9 @@ export const AllTypesProps: Record<string,any> = {
 		shipping:"NumberOperators",
 		shippingWithTax:"NumberOperators",
 		total:"NumberOperators",
-		totalWithTax:"NumberOperators"
+		totalWithTax:"NumberOperators",
+		_and:"OrderFilterParameter",
+		_or:"OrderFilterParameter"
 	},
 	OrderSortParameter:{
 		id:"SortOrder",
@@ -361,7 +376,9 @@ export const AllTypesProps: Record<string,any> = {
 		languageCode:"StringOperators",
 		facetId:"IDOperators",
 		name:"StringOperators",
-		code:"StringOperators"
+		code:"StringOperators",
+		_and:"FacetValueFilterParameter",
+		_or:"FacetValueFilterParameter"
 	},
 	FacetValueSortParameter:{
 		id:"SortOrder",
@@ -375,7 +392,9 @@ export const AllTypesProps: Record<string,any> = {
 		id:"IDOperators",
 		createdAt:"DateOperators",
 		updatedAt:"DateOperators",
-		type:"StringOperators"
+		type:"StringOperators",
+		_and:"HistoryEntryFilterParameter",
+		_or:"HistoryEntryFilterParameter"
 	},
 	HistoryEntrySortParameter:{
 		id:"SortOrder",
@@ -391,7 +410,9 @@ export const AllTypesProps: Record<string,any> = {
 		slug:"StringOperators",
 		position:"NumberOperators",
 		description:"StringOperators",
-		parentId:"IDOperators"
+		parentId:"IDOperators",
+		_and:"CollectionFilterParameter",
+		_or:"CollectionFilterParameter"
 	},
 	CollectionSortParameter:{
 		id:"SortOrder",
@@ -409,7 +430,9 @@ export const AllTypesProps: Record<string,any> = {
 		updatedAt:"DateOperators",
 		languageCode:"StringOperators",
 		name:"StringOperators",
-		code:"StringOperators"
+		code:"StringOperators",
+		_and:"FacetFilterParameter",
+		_or:"FacetFilterParameter"
 	},
 	FacetSortParameter:{
 		id:"SortOrder",
@@ -425,7 +448,11 @@ export const AllTypesProps: Record<string,any> = {
 		languageCode:"StringOperators",
 		name:"StringOperators",
 		slug:"StringOperators",
-		description:"StringOperators"
+		description:"StringOperators",
+		enabled:"BooleanOperators",
+		_and:"ProductFilterParameter",
+		_or:"ProductFilterParameter",
+		landing:"StringOperators"
 	},
 	ProductSortParameter:{
 		id:"SortOrder",
@@ -433,7 +460,8 @@ export const AllTypesProps: Record<string,any> = {
 		updatedAt:"SortOrder",
 		name:"SortOrder",
 		slug:"SortOrder",
-		description:"SortOrder"
+		description:"SortOrder",
+		landing:"SortOrder"
 	},
 	NativeAuthInput:{
 
@@ -488,7 +516,8 @@ export const ReturnTypes: Record<string,any> = {
 		requestUpdateCustomerEmailAddress:"RequestUpdateCustomerEmailAddressResult",
 		updateCustomerEmailAddress:"UpdateCustomerEmailAddressResult",
 		requestPasswordReset:"RequestPasswordResetResult",
-		resetPassword:"ResetPasswordResult"
+		resetPassword:"ResetPasswordResult",
+		registerNewSeller:"Channel"
 	},
 	Address:{
 		id:"ID",
@@ -861,6 +890,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		ui:"JSON"
 	},
 	StringCustomFieldConfig:{
@@ -873,6 +903,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		pattern:"String",
 		options:"StringFieldOption",
 		ui:"JSON"
@@ -891,6 +922,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		pattern:"String",
 		ui:"JSON"
 	},
@@ -903,6 +935,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		min:"Int",
 		max:"Int",
 		step:"Int",
@@ -917,6 +950,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		min:"Float",
 		max:"Float",
 		step:"Float",
@@ -931,6 +965,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		ui:"JSON"
 	},
 	DateTimeCustomFieldConfig:{
@@ -942,6 +977,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		min:"String",
 		max:"String",
 		step:"Int",
@@ -956,6 +992,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		entity:"String",
 		scalarFields:"String",
 		ui:"JSON"
@@ -969,6 +1006,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		ui:"JSON"
 	},
 	LocaleTextCustomFieldConfig:{
@@ -980,6 +1018,7 @@ export const ReturnTypes: Record<string,any> = {
 		readonly:"Boolean",
 		internal:"Boolean",
 		nullable:"Boolean",
+		requiresPermission:"Permission",
 		ui:"JSON"
 	},
 	LocalizedString:{
@@ -1363,6 +1402,7 @@ export const ReturnTypes: Record<string,any> = {
 		name:"String",
 		slug:"String",
 		description:"String",
+		enabled:"Boolean",
 		featuredAsset:"Asset",
 		assets:"Asset",
 		variants:"ProductVariant",
@@ -1371,7 +1411,7 @@ export const ReturnTypes: Record<string,any> = {
 		facetValues:"FacetValue",
 		translations:"ProductTranslation",
 		collections:"Collection",
-		customFields:"JSON"
+		customFields:"ProductCustomFields"
 	},
 	ProductTranslation:{
 		id:"ID",
@@ -1758,6 +1798,9 @@ export const ReturnTypes: Record<string,any> = {
 	ActiveOrderResult:{
 		"...on Order":"Order",
 		"...on NoActiveOrderError":"NoActiveOrderError"
+	},
+	ProductCustomFields:{
+		landing:"String"
 	}
 }
 
