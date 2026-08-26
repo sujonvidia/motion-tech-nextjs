@@ -34,7 +34,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = props => {
                     availableCountries={availableCountries}
                     shippingMethods={shippingMethods ?? eligibleShippingMethods ?? null}
                     activeCustomer={activeCustomer ?? null}
-                    paymentMethod={paymentMethod ?? eligiblePaymentMethods?.find(method => method.code === 'standard-payment')?.code}
+                    paymentMethod={
+                        paymentMethod ??
+                        eligiblePaymentMethods?.find(method => method.code === 'cash')?.code ??
+                        eligiblePaymentMethods?.[0]?.code
+                    }
                     autoPlaceOrder={autoPlaceOrder}
                 />
                     <CheckoutCarousel alsoBoughtProducts={alsoBoughtProducts ?? null} />

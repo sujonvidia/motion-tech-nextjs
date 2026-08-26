@@ -251,16 +251,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 });
 
                 if (setCustomerForOrder?.__typename !== 'Order') {
-                    if (setCustomerForOrder.__typename === 'EmailAddressConflictError') {
+                    if (setCustomerForOrder.__typename === 'AlreadyLoggedInError') {
+                    } else if (setCustomerForOrder.__typename === 'EmailAddressConflictError') {
                         // TODO: IN THIS CASE WE SHOULD SHOW THE LOGIN FORM or ADD A LINK TO LOGIN
                         setError('emailAddress', {
                             message: tErrors(`errors.backend.${setCustomerForOrder.errorCode}`),
                         });
                         setFocus('emailAddress');
+                        return;
                     } else {
                         setError('root', { message: tErrors(`errors.backend.${setCustomerForOrder.errorCode}`) });
+                        return;
                     }
-                    // return;
                 }
             }
 

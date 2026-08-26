@@ -10,8 +10,7 @@ import { useTranslation } from 'next-i18next';
 import { priceFormatter } from '@/src/util/priceFormatter';
 import { CurrencyCode } from '@/src/zeus';
 import styled from '@emotion/styled';
-import { ActiveOrderType } from '@/src/graphql/selectors';
-import { ShippingMethodsSelector } from '@/src/graphql/selectors';
+import { ActiveCustomerSelector, ActiveCustomerType, ActiveOrderType, ShippingMethodsSelector } from '@/src/graphql/selectors';
 import { storefrontApiQuery } from '@/src/graphql/client';
 import { useChannels } from '@/src/state/channels';
 
@@ -147,10 +146,17 @@ const CheckoutContent = ({ loading, autoPlaceOrder }: { loading: boolean; autoPl
     const ctx = useChannels();
     const { t } = useTranslation('checkout');
     const [shippingMethods, setShippingMethods] = useState<any[]>([]);
+    const [activeCustomer, setActiveCustomer] = useState<ActiveCustomerType | null>(null);
 
     useEffect(() => {
-        storefrontApiQuery(ctx)({ eligibleShippingMethods: ShippingMethodsSelector })
-            .then(({ eligibleShippingMethods }) => setShippingMethods(eligibleShippingMethods ?? []))
+        Promise.all([
+            storefrontApiQuery(ctx)({ eligibleShippingMethods: ShippingMethodsSelector }),
+            storefrontApiQuery(ctx)({ activeCustomer: ActiveCustomerSelector }),
+        ])
+            .then(([shippingResponse, customerResponse]) => {
+                setShippingMethods(shippingResponse.eligibleShippingMethods ?? []);
+                setActiveCustomer(customerResponse.activeCustomer ?? null);
+            })
             .catch(error => console.error('Failed to load shipping methods', error));
     }, [ctx.channel, ctx.locale]);
 
@@ -160,8 +166,9 @@ const CheckoutContent = ({ loading, autoPlaceOrder }: { loading: boolean; autoPl
         <CheckoutContainer>
             <CheckoutPage
                 autoPlaceOrder={autoPlaceOrder}
-                paymentMethod="standard-payment"
+                paymentMethod="cash"
                 shippingMethods={shippingMethods}
+                activeCustomer={activeCustomer}
             />
         </CheckoutContainer>
     );

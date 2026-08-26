@@ -63,7 +63,10 @@ export const OrderPayment: React.FC<OrderPaymentProps> = ({ availablePaymentMeth
         if (stripeData?.paymentIntent) initStripe();
     }, []);
 
-    const defaultMethod = availablePaymentMethods?.find(m => m.code === 'standard-payment');
+    const defaultMethod =
+        availablePaymentMethods?.find(m => m.code === 'cash') ??
+        availablePaymentMethods?.find(m => m.code === 'standard-payment') ??
+        availablePaymentMethods?.[0];
     console.log('availablePaymentMethods',availablePaymentMethods);
 
     const standardMethod = async (method: string, metadata: StandardMethodMetadata) => {
