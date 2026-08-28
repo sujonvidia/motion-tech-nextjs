@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { InferGetStaticPropsType, GetStaticProps } from 'next';
+import type { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
-import { getStaticPaths } from '@/src/components/pages/products/paths';
 import { CheckoutPage } from '@/src/components/pages/checkout';
 import { CheckoutProvider } from '@/src/state/checkout';
 import { useCart } from '@/src/state/cart';
@@ -10,8 +9,8 @@ import { useTranslation } from 'next-i18next';
 import { priceFormatter } from '@/src/util/priceFormatter';
 import { CurrencyCode } from '@/src/zeus';
 import styled from '@emotion/styled';
-import { ActiveCustomerSelector, ActiveCustomerType, ActiveOrderType, ShippingMethodsSelector } from '@/src/graphql/selectors';
-import { storefrontApiQuery } from '@/src/graphql/client';
+import { ActiveCustomerSelector, ActiveCustomerType, ActiveOrderSelector, ActiveOrderType, ShippingMethodsSelector } from '@/src/graphql/selectors';
+import { SSRMutation, storefrontApiQuery } from '@/src/graphql/client';
 import { useChannels } from '@/src/state/channels';
 
 const plainText = (value?: string) => value?.replace(/<[^>]*>/g, '').trim() || '';
@@ -20,14 +19,13 @@ const landingMarkup = (value: string) => value
     .replace(/href=["']\/checkout\/?["']/gi, 'href="#order"')
     .replace(/id=["']order["']/gi, 'id="product-details"');
 
-const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps>) => {
+const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const { t } = useTranslation('checkout');
-    const { product } = props;
-    const { addToCart, fetchActiveOrder, setItemQuantity } = useCart();
-    const [loading, setLoading] = useState(true);
-    const [hasAddedToCart, setHasAddedToCart] = useState(false);
-    const [checkoutOrder, setCheckoutOrder] = useState<ActiveOrderType>();
+    const { product, initialActiveOrder } = props;
+    const [checkoutOrder, setCheckoutOrder] = useState<ActiveOrderType | undefined>(initialActiveOrder);
     const [orderError, setOrderError] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const ctx = useChannels();
 
     useEffect(() => {
         const fetchOrderData = async () => {
@@ -36,27 +34,26 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
                 if (!offerVariant) {
                     return;
                 }
-                let activeOrder = await fetchActiveOrder();
+                let activeOrder = checkoutOrder;
+                if (!activeOrder) {
+                    const [{ activeOrder: fetched }] = await Promise.all([
+                        storefrontApiQuery(ctx)({ activeOrder: ActiveOrderSelector }),
+                    ]);
+                    activeOrder = fetched;
+                    setCheckoutOrder(fetched);
+                }
+
                 const isProductInOrder = activeOrder?.lines?.some(
                     line => line.productVariant.id === offerVariant.id
                 );
 
-                if (!isProductInOrder && !hasAddedToCart) {
-                    setHasAddedToCart(true);
-                    activeOrder = (await addToCart(offerVariant.id, 1)) ?? (await fetchActiveOrder());
-                }
-                const offerLine = activeOrder?.lines?.find(
-                    line => line.productVariant.id === offerVariant.id,
-                );
-                if (offerLine && offerLine.quantity !== 1) {
-                    const adjustedOrder = await setItemQuantity(offerLine.id, 1);
-                    if (adjustedOrder) {
-                        activeOrder = adjustedOrder;
+                if (!isProductInOrder) {
+                    setLoading(true);
+                    const { addToCart } = useCart.getState();
+                    const result = await addToCart(offerVariant.id, 1);
+                    if (result?.__typename === 'Order') {
+                        setCheckoutOrder(result);
                     }
-                }
-                setCheckoutOrder(activeOrder);
-                if (!activeOrder) {
-                    setOrderError(true);
                 }
             } catch (e) {
                 console.error('Failed to add item to order on offer page', e);
@@ -125,7 +122,7 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
                 <SectionTitle>Bring better coffee home.</SectionTitle>
                 {checkoutOrder ? (
                     <CheckoutProvider initialState={{ checkout: checkoutOrder }}>
-                        <CheckoutContent loading={loading} autoPlaceOrder />
+                        <CheckoutContent loading={loading} />
                     </CheckoutProvider>
                 ) : orderError ? (
                     <CheckoutMessage>Unable to load the order. Please refresh and try again.</CheckoutMessage>
@@ -142,7 +139,7 @@ const LandingPage = (props: InferGetStaticPropsType<typeof productGetStaticProps
     );
 };
 
-const CheckoutContent = ({ loading, autoPlaceOrder }: { loading: boolean; autoPlaceOrder?: boolean }) => {
+const CheckoutContent = ({ loading }: { loading: boolean }) => {
     const ctx = useChannels();
     const { t } = useTranslation('checkout');
     const [shippingMethods, setShippingMethods] = useState<any[]>([]);
@@ -165,7 +162,6 @@ const CheckoutContent = ({ loading, autoPlaceOrder }: { loading: boolean; autoPl
     ) : (
         <CheckoutContainer>
             <CheckoutPage
-                autoPlaceOrder={autoPlaceOrder}
                 paymentMethod="cash"
                 shippingMethods={shippingMethods}
                 activeCustomer={activeCustomer}
@@ -176,8 +172,8 @@ const CheckoutContent = ({ loading, autoPlaceOrder }: { loading: boolean; autoPl
 
 export default LandingPage;
 
-export const getStaticProps: GetStaticProps = async (context) => {
-    const { params, locale } = context;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { params, locale, req } = context;
 
     if (!params?.slug || (Array.isArray(params.slug) && params.slug.length === 0)) {
         return { notFound: true };
@@ -190,15 +186,41 @@ export const getStaticProps: GetStaticProps = async (context) => {
         params: { slug, locale: locale ?? 'en', channel },
     });
 
+    const product = productProps.props.product;
+    let initialActiveOrder: ActiveOrderType | undefined;
+
+    if (product?.variants?.length > 0) {
+        const firstVariant = product.variants[0];
+        try {
+            const result = await SSRMutation(context)({
+                addItemToOrder: [
+                    { productVariantId: firstVariant.id, quantity: 1 },
+                    {
+                        __typename: true,
+                        '...on Order': ActiveOrderSelector,
+                        '...on OrderLimitError': { errorCode: true, message: true },
+                        '...on InsufficientStockError': { errorCode: true, message: true },
+                        '...on NegativeQuantityError': { errorCode: true, message: true },
+                        '...on OrderModificationError': { errorCode: true, message: true },
+                    },
+                ],
+            });
+            if (result?.addItemToOrder?.__typename === 'Order') {
+                initialActiveOrder = result.addItemToOrder;
+            }
+        } catch (e) {
+            console.error('Failed to add item to order on offer page', e);
+        }
+    }
+
     return {
         props: {
             ...productProps.props,
+            initialActiveOrder,
             ...(await serverSideTranslations(locale ?? 'en', ['checkout'])),
         },
     };
 };
-
-export { getStaticPaths };
 
 const Wrapper = styled.div`
     min-height: 100vh;

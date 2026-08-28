@@ -24,15 +24,16 @@ export const scalars = ZeusScalars({
 });
 
 //use 'http://localhost:3000/shop-api/' in local .env file for localhost development and provide env to use on prod/dev envs
-
 export const VENDURE_HOST = `${process.env.NEXT_PUBLIC_HOST || 'https://vendure-dev.aexol.com'}/shop-api`;
+export const VENDURE_HOST_CLIENT = '/shop-api';
 
 const apiFetchVendure =
     (options: fetchOptions) =>
     (query: string, variables: Record<string, unknown> = {}) => {
         const fetchOptions = options[1] || {};
         if (fetchOptions.method && fetchOptions.method === 'GET') {
-            return fetch(`${options[0]}?query=${encodeURIComponent(query)}`, fetchOptions)
+            const separator = String(options[0]).includes('?') ? '&' : '?';
+            return fetch(`${options[0]}${separator}query=${encodeURIComponent(query)}`, fetchOptions)
                 .then(handleFetchResponse)
                 .then((response: GraphQLResponse) => {
                     if (response.errors) {
@@ -43,19 +44,24 @@ const apiFetchVendure =
         }
         const additionalHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
         return fetch(`${options[0]}`, {
+            ...fetchOptions,
             body: JSON.stringify({ query, variables }),
             method: 'POST',
             credentials: 'include',
             headers: {
+                ...(fetchOptions?.headers as Record<string, string> | undefined),
                 'Content-Type': 'application/json',
                 ...additionalHeaders,
             },
-            ...fetchOptions,
         })
             .then(r => {
                 const authToken = r.headers.get('vendure-auth-token');
                 if (authToken != null) {
                     token = authToken;
+                    if (typeof window !== 'undefined') {
+                        window.localStorage.setItem('token', authToken);
+                        document.cookie = `vendure-auth-token=${encodeURIComponent(authToken)}; path=/; SameSite=Lax`;
+                    }
                 }
                 return handleFetchResponse(r);
             })
@@ -70,7 +76,7 @@ const apiFetchVendure =
 export const VendureChain = (...options: chainOptions) => Thunder(apiFetchVendure(options));
 
 export const storefrontApiQuery = (ctx: { locale: string; channel: string }) => {
-    const HOST = `${VENDURE_HOST}?languageCode=${ctx.locale}`;
+    const HOST = `${VENDURE_HOST_CLIENT}?languageCode=${ctx.locale}`;
 
     return VendureChain(HOST, {
         headers: {
@@ -81,7 +87,7 @@ export const storefrontApiQuery = (ctx: { locale: string; channel: string }) => 
 };
 
 export const storefrontApiMutation = (ctx: { locale: string; channel: string }) => {
-    const HOST = `${VENDURE_HOST}?languageCode=${ctx.locale}`;
+    const HOST = `${VENDURE_HOST_CLIENT}?languageCode=${ctx.locale}`;
 
     return VendureChain(HOST, {
         headers: {
@@ -111,6 +117,7 @@ export const SSRQuery = (context: GetServerSidePropsContext) => {
         session: context.req.cookies['session'],
         'session.sig': context.req.cookies['session.sig'],
     };
+    const authToken = context.req.cookies['vendure-auth-token'];
 
     const ctx = getContext(context);
     const properChannel = ctx?.params?.channel as string;
@@ -122,6 +129,7 @@ export const SSRQuery = (context: GetServerSidePropsContext) => {
             Cookie: `session=${authCookies['session']}; session.sig=${authCookies['session.sig']}`,
             'Content-Type': 'application/json',
             'vendure-token': properChannel,
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
     })('query', { scalars });
 };
@@ -131,6 +139,7 @@ export const SSRMutation = (context: GetServerSidePropsContext) => {
         session: context.req.cookies['session'],
         'session.sig': context.req.cookies['session.sig'],
     };
+    const authToken = context.req.cookies['vendure-auth-token'];
 
     const ctx = getContext(context);
     const properChannel = ctx?.params?.channel as string;
@@ -142,6 +151,7 @@ export const SSRMutation = (context: GetServerSidePropsContext) => {
             Cookie: `session=${authCookies['session']}; session.sig=${authCookies['session.sig']}`,
             'Content-Type': 'application/json',
             'vendure-token': properChannel,
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
     })('mutation', { scalars });
 };

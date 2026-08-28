@@ -11,7 +11,7 @@ const nextConfig = {
         return [
             {
                 source: '/shop-api/:path*',
-                destination: `${process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://motion-tech-server-production-a8dc.up.railway.app'}/shop-api/:path*`,
+                destination: `${process.env.NEXT_PUBLIC_HOST || 'http://localhost:3000'}/shop-api/:path*`,
             },
         ];
     },
