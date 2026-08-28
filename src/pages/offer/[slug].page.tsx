@@ -22,6 +22,7 @@ const landingMarkup = (value: string) => value
 const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const { t } = useTranslation('checkout');
     const { product, initialActiveOrder } = props;
+    const { addToCart } = useCart();
     const [checkoutOrder, setCheckoutOrder] = useState<ActiveOrderType | undefined>(initialActiveOrder);
     const [orderError, setOrderError] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -49,9 +50,8 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
 
                 if (!isProductInOrder) {
                     setLoading(true);
-                    const { addToCart } = useCart.getState();
                     const result = await addToCart(offerVariant.id, 1);
-                    if (result?.__typename === 'Order') {
+                    if (result) {
                         setCheckoutOrder(result);
                     }
                 }
@@ -186,10 +186,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         params: { slug, locale: locale ?? 'en', channel },
     });
 
-    const product = productProps.props.product;
+    const product = productProps?.props?.product;
     let initialActiveOrder: ActiveOrderType | undefined;
 
-    if (product?.variants?.length > 0) {
+    if (product && product.variants && product.variants.length > 0) {
         const firstVariant = product.variants[0];
         try {
             const result = await SSRMutation(context)({
