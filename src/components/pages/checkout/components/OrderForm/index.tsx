@@ -159,20 +159,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         billing,
         shipping,
         phoneNumber,
-        // NIP,
         shippingDifferentThanBilling,
         createAccount,
         password,
     }) => {
         try {
-            if (deliveryMethod && activeOrder?.shippingLines[0]?.shippingMethod.id !== deliveryMethod) {
-                await changeShippingMethod(deliveryMethod);
-            }
-            const { nextOrderStates } = await storefrontApiQuery(ctx)({ nextOrderStates: true });
-            if (!nextOrderStates.includes('ArrangingPayment')) {
-                setError('root', { message: tErrors(`errors.backend.UNKNOWN_ERROR`) });
-                return;
-            }
             // Set the billing address for the order
             const { setOrderBillingAddress } = await storefrontApiMutation(ctx)({
                 setOrderBillingAddress: [
@@ -181,7 +172,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                             ...billing,
                             defaultBillingAddress: false,
                             defaultShippingAddress: false,
-                            // customFields: { NIP }
                         },
                     },
                     {
@@ -199,7 +189,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
             // Set the shipping address for the order
             if (shippingDifferentThanBilling) {
-                // Set the shipping address for the order if it is different than billing
                 const { setOrderShippingAddress } = await storefrontApiMutation(ctx)({
                     setOrderShippingAddress: [
                         { input: { ...shipping, defaultBillingAddress: false, defaultShippingAddress: false } },
@@ -216,7 +205,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     return;
                 }
             } else {
-                // Set the billing address for the order if it is the same as shipping
                 const { setOrderShippingAddress } = await storefrontApiMutation(ctx)({
                     setOrderShippingAddress: [
                         { input: { ...billing, defaultBillingAddress: false, defaultShippingAddress: false } },
@@ -232,6 +220,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     setError('root', { message: tErrors(`errors.backend.NO_ACTIVE_ORDER_ERROR`) });
                     return;
                 }
+            }
+
+            // Change shipping method after addresses are set
+            // Always re-apply the shipping method to ensure it's valid for the new address
+            if (deliveryMethod) {
+                const setOrderShippingMethodResult = await changeShippingMethod(deliveryMethod);
+                if (setOrderShippingMethodResult && setOrderShippingMethodResult.__typename !== 'Order') {
+                    setError('root', { 
+                        message: setOrderShippingMethodResult.message || tErrors('errors.backend.UNKNOWN_ERROR') 
+                    });
+                    return;
+                }
+            }
+
+            const { nextOrderStates } = await storefrontApiQuery(ctx)({ nextOrderStates: true });
+            if (!nextOrderStates.includes('ArrangingPayment')) {
+                setError('root', { message: tErrors(`errors.backend.UNKNOWN_ERROR`) });
+                return;
             }
 
             if (!activeCustomer) {
@@ -252,8 +258,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
                 if (setCustomerForOrder?.__typename !== 'Order') {
                     if (setCustomerForOrder.__typename === 'AlreadyLoggedInError') {
+                        setError('root', { message: tErrors(`errors.backend.${setCustomerForOrder.errorCode}`) });
+                        return;
                     } else if (setCustomerForOrder.__typename === 'EmailAddressConflictError') {
-                        // TODO: IN THIS CASE WE SHOULD SHOW THE LOGIN FORM or ADD A LINK TO LOGIN
                         setError('emailAddress', {
                             message: tErrors(`errors.backend.${setCustomerForOrder.errorCode}`),
                         });

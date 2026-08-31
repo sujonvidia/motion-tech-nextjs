@@ -10,7 +10,7 @@ import { priceFormatter } from '@/src/util/priceFormatter';
 import { CurrencyCode } from '@/src/zeus';
 import styled from '@emotion/styled';
 import { ActiveCustomerSelector, ActiveCustomerType, ActiveOrderSelector, ActiveOrderType, ShippingMethodsSelector } from '@/src/graphql/selectors';
-import { SSRMutation, storefrontApiQuery } from '@/src/graphql/client';
+import { SSRMutation, SSRQuery, storefrontApiQuery } from '@/src/graphql/client';
 import { useChannels } from '@/src/state/channels';
 
 const plainText = (value?: string) => value?.replace(/<[^>]*>/g, '').trim() || '';
@@ -192,6 +192,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (product && product.variants && product.variants.length > 0) {
         const firstVariant = product.variants[0];
         try {
+            const existingOrderResult = await SSRQuery(context)({
+                activeOrder: { id: true, totalQuantity: true },
+            });
+            if (existingOrderResult.activeOrder?.totalQuantity && existingOrderResult.activeOrder.totalQuantity > 0) {
+                await SSRMutation(context)({
+                    removeAllOrderLines: {
+                        __typename: true,
+                        '...on Order': ActiveOrderSelector,
+                        '...on OrderModificationError': { errorCode: true, message: true },
+                    },
+                });
+            }
             const result = await SSRMutation(context)({
                 addItemToOrder: [
                     { productVariantId: firstVariant.id, quantity: 1 },

@@ -128,8 +128,8 @@ const useCheckoutContainer = createContainer<CheckoutContainerType, { checkout: 
             });
             if (setOrderShippingMethod.__typename === 'Order') {
                 setActiveOrder(setOrderShippingMethod);
-                return;
             }
+            return setOrderShippingMethod;
         } catch {
             console.log('Error while changing shipping method');
         }

@@ -1,8 +1,15 @@
 import { ActiveOrderType } from '@/src/graphql/selectors';
 
+export type ShippingMethodResult = {
+    __typename: string;
+    id?: string;
+    errorCode?: string;
+    message?: string;
+};
+
 export type CheckoutContainerType = {
     activeOrder?: ActiveOrderType;
-    changeShippingMethod: (id: string) => Promise<void>;
+    changeShippingMethod: (id: string) => Promise<ShippingMethodResult | undefined>;
     applyCouponCode: (code: string) => Promise<boolean>;
     removeCouponCode: (code: string) => Promise<void>;
 

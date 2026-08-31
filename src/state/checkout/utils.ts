@@ -2,7 +2,7 @@ import { CheckoutContainerType } from './types';
 
 export const emptyCheckoutState: CheckoutContainerType = {
     activeOrder: undefined,
-    changeShippingMethod: async () => {},
+    changeShippingMethod: async () => undefined,
     applyCouponCode: async () => false,
     removeCouponCode: async () => {},
 
