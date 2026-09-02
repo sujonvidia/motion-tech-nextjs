@@ -331,7 +331,7 @@ const Eyebrow = styled.p`
     margin-bottom: 1.8rem;
     color: #e8ad78;
     font-family: Arial, sans-serif;
-    font-size: clamp(1.1rem, 1.3vw, 1.5rem);
+    font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: .16em;
     text-transform: uppercase;
@@ -340,7 +340,7 @@ const Eyebrow = styled.p`
 const HeroTitle = styled.h1`
     max-width: 68rem;
     margin-bottom: 2rem;
-    font-size: clamp(2.8rem, 4.5vw, 5.2rem);
+    font-size: 2.5rem;
     line-height: .94;
 `;
 
@@ -348,7 +348,7 @@ const HeroDescription = styled.p`
     max-width: 52rem;
     margin-bottom: 3.2rem;
     color: #f6e8dc;
-    font-size: clamp(1.4rem, 1.8vw, 2rem);
+    font-size: 2.5rem;
     line-height: 1.45;
 `;
 
@@ -359,10 +359,10 @@ const PrimaryLink = styled.a`
     color: #30251f;
     background: #e8ad78;
     font-family: Arial, sans-serif;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     font-weight: 700;
 `;
-const HeroPrice = styled.span` color: #fff; font-size: 2rem; font-weight: 700; `;
+const HeroPrice = styled.span` color: #fff; font-size: 2.5rem; font-weight: 700; `;
 const HeroStamp = styled.div`
     position: absolute;
     right: 6%;
@@ -375,7 +375,7 @@ const HeroStamp = styled.div`
     border: 1px solid #e8ad78;
     border-radius: 50%;
     color: #e8ad78;
-    font-size: clamp(1.1rem, 1.3vw, 1.5rem);
+    font-size: clamp(1rem, 1.2vw, 1.3rem);
     line-height: 1.2;
     text-align: center;
     transform: rotate(12deg);
@@ -410,14 +410,14 @@ const StyledLandingContent = styled.div`
     }
 
     .hero > div:nth-child(2) > h1 {
-        font-size: clamp(4rem, 8vw, 7.2rem) !important;
+        font-size: 3rem !important;
         line-height: normal !important;
     }
 
     .hero > div:nth-child(2) > p {
         margin-top: 1.8rem !important;
         margin-bottom: 2.6rem !important;
-        font-size: 2.2rem !important;
+        font-size: 3rem !important;
     }
 
     .hero > div:nth-child(2) > h1,
@@ -559,18 +559,18 @@ const ProductDetails = styled.section`
     padding: 8rem 2rem;
     text-align: center;
 `;
-const DetailKicker = styled.p` color: #b85c38; font-family: Arial, sans-serif; font-size: clamp(1.1rem, 1.3vw, 1.4rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
-const DetailTitle = styled.h2` margin: 1rem 0; font-size: clamp(2.6rem, 4vw, 4rem); `;
-const DetailText = styled.p` color: #67554a; font-size: clamp(1.4rem, 1.8vw, 2rem); line-height: 1.5; `;
-const DetailPrice = styled.p` margin-top: 2rem; color: #b85c38; font-size: clamp(1.8rem, 2.2vw, 2.6rem); font-weight: 700; `;
+const DetailKicker = styled.p` color: #b85c38; font-family: Arial, sans-serif; font-size: clamp(1rem, 1.2vw, 1.2rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
+const DetailTitle = styled.h2` margin: 1rem 0; font-size: clamp(1.8rem, 2.5vw, 2.5rem); `;
+const DetailText = styled.p` color: #67554a; font-size: clamp(1.2rem, 1.5vw, 1.5rem); line-height: 1.5; `;
+const DetailPrice = styled.p` margin-top: 2rem; color: #b85c38; font-size: clamp(1.5rem, 2vw, 2rem); font-weight: 700; `;
 
 const CheckoutSection = styled.section`
     padding: 7rem max(2rem, calc((100% - 112rem) / 2));
     background: #30251f;
     color: #fff;
 `;
-const SectionKicker = styled.p` color: #e8ad78; font-family: Arial, sans-serif; font-size: clamp(1.1rem, 1.3vw, 1.4rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
-const SectionTitle = styled.h2` margin: 1rem 0 3rem; color: #fff; font-size: clamp(2.6rem, 4vw, 4rem); `;
+const SectionKicker = styled.p` color: #e8ad78; font-family: Arial, sans-serif; font-size: clamp(1rem, 1.2vw, 1.2rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
+const SectionTitle = styled.h2` margin: 1rem 0 3rem; color: #fff; font-size: clamp(1.8rem, 2.5vw, 2.5rem); `;
 const CheckoutMessage = styled.p` color: #f6e8dc; font-size: 1.7rem; `;
 
 const OfferFooter = styled.footer`
