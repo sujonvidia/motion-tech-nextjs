@@ -159,6 +159,20 @@ const useCartContainer = createContainer(() => {
         }
     };
 
+    const clearCart = async () => {
+        try {
+            await storefrontApiMutation(ctx)({
+                removeAllOrderLines: {
+                    __typename: true,
+                    '...on Order': ActiveOrderSelector,
+                    '...on OrderModificationError': { errorCode: true, message: true },
+                },
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    };
+
     const applyCouponCode = async (code: string) => {
         try {
             const { applyCouponCode } = await storefrontApiMutation(ctx)({
@@ -206,6 +220,7 @@ const useCartContainer = createContainer(() => {
         setItemQuantity,
         setItemQuantityInCart,
         removeFromCart,
+        clearCart,
         fetchActiveOrder,
 
         applyCouponCode,

@@ -3,14 +3,13 @@ import type { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { getStaticProps as productGetStaticProps } from '@/src/components/pages/products/props';
 import { CheckoutPage } from '@/src/components/pages/checkout';
 import { CheckoutProvider } from '@/src/state/checkout';
-import { useCart } from '@/src/state/cart';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { priceFormatter } from '@/src/util/priceFormatter';
 import { CurrencyCode } from '@/src/zeus';
 import styled from '@emotion/styled';
 import { ActiveCustomerSelector, ActiveCustomerType, ActiveOrderSelector, ActiveOrderType, ShippingMethodsSelector } from '@/src/graphql/selectors';
-import { SSRMutation, SSRQuery, storefrontApiQuery } from '@/src/graphql/client';
+import { SSRMutation, SSRQuery, storefrontApiMutation, storefrontApiQuery } from '@/src/graphql/client';
 import { useChannels } from '@/src/state/channels';
 
 const plainText = (value?: string) => value?.replace(/<[^>]*>/g, '').trim() || '';
@@ -22,7 +21,6 @@ const landingMarkup = (value: string) => value
 const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const { t } = useTranslation('checkout');
     const { product, initialActiveOrder } = props;
-    const { addToCart } = useCart();
     const [checkoutOrder, setCheckoutOrder] = useState<ActiveOrderType | undefined>(initialActiveOrder);
     const [orderError, setOrderError] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -31,6 +29,7 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
     useEffect(() => {
         const fetchOrderData = async () => {
             try {
+                console.log('offer useEffect', { product: product?.name, checkoutOrder });
                 const offerVariant = product?.variants?.[0];
                 if (!offerVariant) {
                     return;
@@ -41,18 +40,45 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
                         storefrontApiQuery(ctx)({ activeOrder: ActiveOrderSelector }),
                     ]);
                     activeOrder = fetched;
+                    console.log('fetched activeOrder', activeOrder);
                     setCheckoutOrder(fetched);
                 }
 
                 const isProductInOrder = activeOrder?.lines?.some(
                     line => line.productVariant.id === offerVariant.id
                 );
+                console.log('isProductInOrder', isProductInOrder, 'lines', activeOrder?.lines?.map(l => l.productVariant.id));
 
                 if (!isProductInOrder) {
                     setLoading(true);
-                    const result = await addToCart(offerVariant.id, 1);
-                    if (result) {
-                        setCheckoutOrder(result);
+                    if (activeOrder?.lines?.length > 0) {
+                        console.log('clearing cart');
+                        await storefrontApiMutation(ctx)({
+                            removeAllOrderLines: {
+                                __typename: true,
+                                '...on Order': ActiveOrderSelector,
+                                '...on OrderModificationError': { errorCode: true, message: true },
+                            },
+                        });
+                    }
+                    console.log('adding offer item');
+                    const addResult = await storefrontApiMutation(ctx)({
+                        addItemToOrder: [
+                            { productVariantId: offerVariant.id, quantity: 1 },
+                            {
+                                __typename: true,
+                                '...on Order': ActiveOrderSelector,
+                                '...on OrderLimitError': { errorCode: true, message: true },
+                                '...on InsufficientStockError': { errorCode: true, message: true },
+                                '...on NegativeQuantityError': { errorCode: true, message: true },
+                                '...on OrderModificationError': { errorCode: true, message: true },
+                            },
+                        ],
+                    });
+                    console.log('addItemToOrder result', addResult);
+                    if (addResult?.__typename === 'Order') {
+                        console.log('setting checkoutOrder', addResult);
+                        setCheckoutOrder(addResult);
                     }
                 }
             } catch (e) {
@@ -121,7 +147,10 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
                 <SectionKicker>Ready when you are</SectionKicker>
                 <SectionTitle>Bring better coffee home.</SectionTitle>
                 {checkoutOrder ? (
-                    <CheckoutProvider initialState={{ checkout: checkoutOrder }}>
+                    <CheckoutProvider
+                        key={`${checkoutOrder.id}-${checkoutOrder.lines?.[0]?.id || 'empty'}`}
+                        initialState={{ checkout: checkoutOrder }}
+                    >
                         <CheckoutContent loading={loading} />
                     </CheckoutProvider>
                 ) : orderError ? (
@@ -228,7 +257,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return {
         props: {
             ...productProps.props,
-            initialActiveOrder,
+            ...(initialActiveOrder ? { initialActiveOrder } : {}),
             ...(await serverSideTranslations(locale ?? 'en', ['checkout'])),
         },
     };
@@ -302,7 +331,7 @@ const Eyebrow = styled.p`
     margin-bottom: 1.8rem;
     color: #e8ad78;
     font-family: Arial, sans-serif;
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 1.3vw, 1.5rem);
     font-weight: 700;
     letter-spacing: .16em;
     text-transform: uppercase;
@@ -311,7 +340,7 @@ const Eyebrow = styled.p`
 const HeroTitle = styled.h1`
     max-width: 68rem;
     margin-bottom: 2rem;
-    font-size: clamp(4.8rem, 9vw, 9.6rem);
+    font-size: clamp(2.8rem, 4.5vw, 5.2rem);
     line-height: .94;
 `;
 
@@ -319,7 +348,7 @@ const HeroDescription = styled.p`
     max-width: 52rem;
     margin-bottom: 3.2rem;
     color: #f6e8dc;
-    font-size: 2rem;
+    font-size: clamp(1.4rem, 1.8vw, 2rem);
     line-height: 1.45;
 `;
 
@@ -346,7 +375,7 @@ const HeroStamp = styled.div`
     border: 1px solid #e8ad78;
     border-radius: 50%;
     color: #e8ad78;
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 1.3vw, 1.5rem);
     line-height: 1.2;
     text-align: center;
     transform: rotate(12deg);
@@ -457,77 +486,50 @@ const StyledLandingContent = styled.div`
         outline-offset: .3rem;
     }
 
-    h2 {
-        font-size: 4.2rem !important;
-    }
-
-    section > h2 {
-        display: inline-block;
-        margin: 1rem auto 2rem !important;
-        padding: .8rem 1.6rem 1rem !important;
-        border-bottom: .4rem solid #b85c38 !important;
-        border-radius: .8rem;
-        background: #ead7c6 !important;
-        color: #5b3524 !important;
-        font-size: clamp(2.8rem, 5vw, 4.6rem) !important;
-        line-height: 1.15 !important;
-    }
-
-    h3 {
-        font-size: 2.8rem !important;
-    }
-
-    p,
-    li,
-    blockquote {
-        font-size: 2.2rem !important;
-    }
-
-    section > div > div {
-        border-radius: 0 !important;
-        border: 0 !important;
-        background: transparent !important;
-        padding: 1rem !important;
-    }
-
-    section:has(> h2) {
-        margin: 2rem auto !important;
-        padding: 2.5rem 2rem !important;
-        border: 1px solid #ddc5b1 !important;
-        border-radius: 2rem !important;
-        background: rgba(255, 248, 240, .92) !important;
-    }
-
-    section:has(> h2) > div {
-        margin-top: .5rem !important;
-        padding: 0 !important;
-        border: 0 !important;
-        background: transparent !important;
-    }
-
-    section[id="product-details"] > div {
-        display: block !important;
-    }
-
-    section[id="product-details"] {
-        margin: 2rem auto !important;
-        padding: 2.5rem 2rem !important;
-        border: 1px solid #ddc5b1 !important;
-        border-radius: 2rem !important;
-        background: rgba(255, 248, 240, .92) !important;
-    }
-
-    section[id="product-details"] > div > div:first-child {
-        display: none !important;
-    }
-
-    section[id="product-details"] > div > div:last-child {
+    section {
         text-align: center !important;
     }
 
-    section[id="product-details"] > div > div:last-child > a {
-        margin-right: auto !important;
-        margin-left: auto !important;
+    section > div {
+        justify-items: center !important;
+    }
+
+    section > div > div {
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    section ul {
+        padding-left: 0 !important;
+        list-style-position: inside !important;
+    }
+
+    a[href="#order"],
+    a[href="/checkout"] {
+        display: inline-block !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        padding: 1.4rem 2.4rem !important;
+        color: #fff !important;
+        background: #b85c38 !important;
+        box-shadow: 0 .8rem 1.8rem rgba(112, 54, 32, .2) !important;
+        font-weight: 700 !important;
+        transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+    }
+
+    a[href="#order"]:hover,
+    a[href="/checkout"]:hover {
+        background: #8f4027 !important;
+        box-shadow: 0 1.1rem 2.4rem rgba(112, 54, 32, .3) !important;
+        transform: translateY(-.2rem) !important;
+    }
+
+    a[href="#order"]:active,
+    a[href="/checkout"]:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 .4rem .8rem rgba(112, 54, 32, .25) !important;
     }
 
     @media (max-width: 600px) {
@@ -557,18 +559,18 @@ const ProductDetails = styled.section`
     padding: 8rem 2rem;
     text-align: center;
 `;
-const DetailKicker = styled.p` color: #b85c38; font-family: Arial, sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
-const DetailTitle = styled.h2` margin: 1rem 0; font-size: 4.4rem; `;
-const DetailText = styled.p` color: #67554a; font-size: 1.8rem; line-height: 1.5; `;
-const DetailPrice = styled.p` margin-top: 2rem; color: #b85c38; font-size: 2.4rem; font-weight: 700; `;
+const DetailKicker = styled.p` color: #b85c38; font-family: Arial, sans-serif; font-size: clamp(1.1rem, 1.3vw, 1.4rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
+const DetailTitle = styled.h2` margin: 1rem 0; font-size: clamp(2.6rem, 4vw, 4rem); `;
+const DetailText = styled.p` color: #67554a; font-size: clamp(1.4rem, 1.8vw, 2rem); line-height: 1.5; `;
+const DetailPrice = styled.p` margin-top: 2rem; color: #b85c38; font-size: clamp(1.8rem, 2.2vw, 2.6rem); font-weight: 700; `;
 
 const CheckoutSection = styled.section`
     padding: 7rem max(2rem, calc((100% - 112rem) / 2));
     background: #30251f;
     color: #fff;
 `;
-const SectionKicker = styled.p` color: #e8ad78; font-family: Arial, sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
-const SectionTitle = styled.h2` margin: 1rem 0 3rem; color: #fff; font-size: 4.4rem; `;
+const SectionKicker = styled.p` color: #e8ad78; font-family: Arial, sans-serif; font-size: clamp(1.1rem, 1.3vw, 1.4rem); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; `;
+const SectionTitle = styled.h2` margin: 1rem 0 3rem; color: #fff; font-size: clamp(2.6rem, 4vw, 4rem); `;
 const CheckoutMessage = styled.p` color: #f6e8dc; font-size: 1.7rem; `;
 
 const OfferFooter = styled.footer`
