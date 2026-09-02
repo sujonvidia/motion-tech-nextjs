@@ -51,7 +51,7 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
 
                 if (!isProductInOrder) {
                     setLoading(true);
-                    if (activeOrder?.lines?.length > 0) {
+                    if (activeOrder?.lines && activeOrder.lines.length > 0) {
                         console.log('clearing cart');
                         await storefrontApiMutation(ctx)({
                             removeAllOrderLines: {
