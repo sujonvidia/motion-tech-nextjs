@@ -76,9 +76,9 @@ const LandingPage = (props: InferGetServerSidePropsType<typeof getServerSideProp
                         ],
                     });
                     console.log('addItemToOrder result', addResult);
-                    if (addResult?.__typename === 'Order') {
-                        console.log('setting checkoutOrder', addResult);
-                        setCheckoutOrder(addResult);
+                    if (addResult?.addItemToOrder?.__typename === 'Order') {
+                        console.log('setting checkoutOrder', addResult.addItemToOrder);
+                        setCheckoutOrder(addResult.addItemToOrder);
                     }
                 }
             } catch (e) {
